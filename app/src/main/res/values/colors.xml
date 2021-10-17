@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="lightMain">#F6BF89</color>
+    <color name="main">#f6ca9f</color>
+
+    <color name="gray_bg">#2F2F2F</color>
+    <color name="gray_light_bg">#30A6A6A6</color>
+
+    <color name="black">#FF000000</color>
+    <color name="black_trans">#aa000000</color>
+    <color name="dark">#212121</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="white_trans">#80FFFFFF</color>
+</resources>

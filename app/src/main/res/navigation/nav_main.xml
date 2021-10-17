@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_main"
+    app:startDestination="@id/fragmentSplash">
+
+    <fragment
+        android:id="@+id/fragmentSplash"
+        android:name="com.example.onlishop.ui.splash.FragmentSplash"
+        android:label="FragmentSplash"
+        tools:layout="@layout/fragment_splash">
+        <action
+            android:id="@+id/fragmentToShop"
+            app:destination="@id/fragmentShop"
+            app:launchSingleTop="true"
+            app:enterAnim="@anim/item_anim_fall_from_bottom"
+            app:exitAnim="@anim/hold"
+            app:popEnterAnim="@anim/hold"
+            app:popExitAnim="@anim/item_anim_fall_to_bottom"
+            app:popUpTo="@id/fragmentSplash"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentShop"
+        android:name="com.example.onlishop.ui.shop.FragmentShop"
+        android:label="FragmentShop"
+        tools:layout="@layout/fragment_shop">
+        <!--        <action-->
+        <!--            android:id="@+id/fromMainToPickPack"-->
+        <!--            app:destination="@id/fragmentPickPack"-->
+        <!--            app:enterAnim="@anim/item_anim_fall_from_bottom"-->
+        <!--            app:exitAnim="@anim/hold"-->
+        <!--            app:popEnterAnim="@anim/hold"-->
+        <!--            app:popExitAnim="@anim/item_anim_fall_to_bottom"-->
+        <!--            app:popUpTo="@id/fragmentMain" />-->
+    </fragment>
+</navigation>
