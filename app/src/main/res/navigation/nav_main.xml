@@ -11,7 +11,7 @@
         android:label="FragmentSplash"
         tools:layout="@layout/fragment_splash">
         <action
-            android:id="@+id/fragmentToShop"
+            android:id="@+id/toShop"
             app:destination="@id/fragmentShop"
             app:launchSingleTop="true"
             app:enterAnim="@anim/item_anim_fall_from_bottom"
@@ -27,6 +27,62 @@
         android:name="com.example.onlishop.ui.shop.FragmentShop"
         android:label="FragmentShop"
         tools:layout="@layout/fragment_shop">
+                <action
+                    android:id="@+id/toDetail"
+                    app:destination="@id/fragmentDetail"
+                    app:enterAnim="@anim/item_anim_fall_from_bottom"
+                    app:exitAnim="@anim/hold"
+                    app:popEnterAnim="@anim/hold"
+                    app:popExitAnim="@anim/item_anim_fall_to_bottom"
+                    app:popUpTo="@id/fragmentShop" />
+        <action
+            android:id="@+id/toSearch"
+            app:destination="@id/fragmentSearch"
+            app:enterAnim="@anim/item_anim_fall_from_bottom"
+            app:exitAnim="@anim/hold"
+            app:popEnterAnim="@anim/hold"
+            app:popExitAnim="@anim/item_anim_fall_to_bottom"
+            app:popUpTo="@id/fragmentShop" />
+
+        <action
+            android:id="@+id/toBag"
+            app:destination="@id/fragmentBag"
+            app:enterAnim="@anim/item_anim_fall_from_bottom"
+            app:exitAnim="@anim/hold"
+            app:popEnterAnim="@anim/hold"
+            app:popExitAnim="@anim/item_anim_fall_to_bottom"
+            app:popUpTo="@id/fragmentShop" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentSearch"
+        android:name="com.example.onlishop.ui.shop.search.FragmentSearch"
+        android:label="fragmentSearch"
+        tools:layout="@layout/fragment_search">
+        <action
+            android:id="@+id/toDetail"
+            app:destination="@id/fragmentDetail"
+            app:enterAnim="@anim/item_anim_fall_from_bottom"
+            app:exitAnim="@anim/hold"
+            app:popEnterAnim="@anim/hold"
+            app:popExitAnim="@anim/item_anim_fall_to_bottom"
+            app:popUpTo="@id/fragmentSearch" />
+
+        <action
+            android:id="@+id/toBag"
+            app:destination="@id/fragmentBag"
+            app:enterAnim="@anim/item_anim_fall_from_bottom"
+            app:exitAnim="@anim/hold"
+            app:popEnterAnim="@anim/hold"
+            app:popExitAnim="@anim/item_anim_fall_to_bottom"
+            app:popUpTo="@id/fragmentSearch" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentDetail"
+        android:name="com.example.onlishop.ui.detail.FragmentDetail"
+        android:label="fragmentDetail"
+        tools:layout="@layout/fragment_item_detail">
         <!--        <action-->
         <!--            android:id="@+id/fromMainToPickPack"-->
         <!--            app:destination="@id/fragmentPickPack"-->
@@ -35,5 +91,48 @@
         <!--            app:popEnterAnim="@anim/hold"-->
         <!--            app:popExitAnim="@anim/item_anim_fall_to_bottom"-->
         <!--            app:popUpTo="@id/fragmentMain" />-->
+        <action
+            android:id="@+id/toBag"
+            app:destination="@id/fragmentBag"
+            app:enterAnim="@anim/item_anim_fall_from_bottom"
+            app:exitAnim="@anim/hold"
+            app:popEnterAnim="@anim/hold"
+            app:popExitAnim="@anim/item_anim_fall_to_bottom"
+            app:popUpTo="@id/fragmentDetail" />
+        <argument android:name="itemId"
+            android:defaultValue="0"
+            app:argType="integer"/>
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentBag"
+        android:name="com.example.onlishop.ui.shop.bag.FragmentBag"
+        android:label="fragmentBag"
+        tools:layout="@layout/fragment_bag">
+        <action
+            android:id="@+id/toConfirm"
+            app:destination="@id/fragmentConfirm"
+            app:enterAnim="@anim/item_anim_fall_from_bottom"
+            app:exitAnim="@anim/hold"
+            app:popEnterAnim="@anim/hold"
+            app:popExitAnim="@anim/item_anim_fall_to_bottom"
+            app:popUpTo="@id/fragmentBag" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/fragmentConfirm"
+        android:name="com.example.onlishop.ui.shop.order.FragmentConfirm"
+        android:label="fragmentConfirm"
+        tools:layout="@layout/fragment_order">
+        <action
+            android:id="@+id/toShop"
+            app:destination="@id/fragmentShop"
+            app:launchSingleTop="true"
+            app:enterAnim="@anim/item_anim_fall_from_bottom"
+            app:exitAnim="@anim/hold"
+            app:popEnterAnim="@anim/hold"
+            app:popExitAnim="@anim/item_anim_fall_to_bottom"
+            app:popUpTo="@id/nav_main"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

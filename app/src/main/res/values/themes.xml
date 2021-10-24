@@ -2,7 +2,7 @@
     <!-- Base application theme. -->
     <style name="Theme.OnliShop" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/main</item>
+        <item name="colorPrimary">@color/lightMain</item>
         <item name="colorPrimaryVariant">@color/lightMain</item>
         <item name="colorOnPrimary">@color/white</item>
         <!-- Secondary brand color. -->
@@ -10,9 +10,14 @@
         <item name="colorSecondaryVariant">@color/gray_light_bg</item>
         <item name="colorOnSecondary">@color/black</item>
         <!-- Status bar color. -->
-        <item name="android:statusBarColor">@color/main</item>
+        <item name="android:statusBarColor">@color/lightMain</item>
         <!-- Customize your theme here. -->
-        <item name="android:windowBackground">@drawable/splash_grad</item>
+        <item name="android:windowBackground">@drawable/splash_grad_turned</item>
+    </style>
+
+    <style name="Theme.OnliShop.Inner" parent="Theme.OnliShop">
+        <!-- Customize your theme here. -->
+        <item name="android:windowBackground">@color/lightMain</item>
     </style>
 
     <style name="SheetDialog" parent="Theme.Design.Light.BottomSheetDialog">
@@ -26,5 +31,12 @@
 
     <style name="FontedText" parent="">
         <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="AutoResizeText" parent="FontedText">
+        <item name="autoSizeTextType">uniform</item>
+        <item name="autoSizeMinTextSize">12sp</item>
+        <item name="autoSizeMaxTextSize">20sp</item>
+        <item name="autoSizeStepGranularity">2sp</item>
     </style>
 </resources>

@@ -11,7 +11,11 @@ import com.example.onlishop.network.items.ItemsService
 import com.example.onlishop.network.items.ItemsServiceImpl
 import com.example.onlishop.repository.ItemRepository
 import com.example.onlishop.repository.ItemRepositoryImpl
+import com.example.onlishop.ui.detail.DetailsViewModel
 import com.example.onlishop.ui.shop.ShopViewModel
+import com.example.onlishop.ui.shop.bag.BagViewModel
+import com.example.onlishop.ui.shop.order.ConfirmViewModel
+import com.example.onlishop.ui.shop.search.SearchViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -43,14 +47,15 @@ val appModule = module {
     single<ItemsService> { ItemsServiceImpl() }
     single<ItemRepository> { ItemRepositoryImpl(get(), get(), get(), get(), get(named("ExternalScope"))) }
 
-//    viewModel {
-//        (paymentClient: PaymentClient) -> MainViewModel(get(), get(), get(), paymentClient)
-//    }
     viewModel { ShopViewModel(get(), get()) }
-//
-//    viewModel {
-//            (packId: String) -> CardsViewModel(get(), get(), packId)
-//    }
+    viewModel { SearchViewModel(get(), get()) }
+    viewModel { BagViewModel(get(), get()) }
+    viewModel { ConfirmViewModel(get(), get()) }
+
+
+    viewModel {
+            (itemId: Int) -> DetailsViewModel(get(), get(), itemId)
+    }
 
 }
 

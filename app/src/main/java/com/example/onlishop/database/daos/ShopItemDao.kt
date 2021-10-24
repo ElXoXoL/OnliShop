@@ -15,6 +15,9 @@ interface ShopItemDao {
     @Query("SELECT * FROM shopitem WHERE groupId=:id")
     fun loadForGroup(id: Int): List<ShopItem>
 
+    @Query("SELECT * FROM shopitem WHERE name LIKE '%' || :search || '%'")
+    fun loadForSearch(search: String): List<ShopItem>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: ShopItem)
 

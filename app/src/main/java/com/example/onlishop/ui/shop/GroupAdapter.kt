@@ -4,6 +4,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.onlishop.app.App
+import com.example.onlishop.base.BaseAdapter
 import com.example.onlishop.base.BaseViewHolder
 import com.example.onlishop.databinding.ItemGroupBinding
 import com.example.onlishop.databinding.ItemItemBinding
@@ -11,23 +13,22 @@ import com.example.onlishop.global.inflater
 import com.example.onlishop.global.load
 import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
+import com.example.onlishop.models.Size
 import kotlin.random.Random
 
-class GroupAdapter(): ListAdapter<Group, RecyclerView.ViewHolder>(DiffCallback()) {
+class GroupAdapter(
+    private val onClick: (item: Group) -> Unit
+): BaseAdapter<Group>(Diff()) {
 
-    private class DiffCallback : DiffUtil.ItemCallback<Group>() {
-
-        override fun areItemsTheSame(oldItem: Group, newItem: Group): Boolean {
-            return oldItem == newItem
+    class Diff: DiffUtil.ItemCallback<Group>(){
+        override fun areItemsTheSame(p0: Group, p1: Group): Boolean {
+            return p0 == p1
         }
 
-        override fun areContentsTheSame(oldItem: Group, newItem: Group): Boolean {
-            return oldItem.id == newItem.id
+        override fun areContentsTheSame(p0: Group, p1: Group): Boolean {
+            return p0.isSelected == p1.isSelected
         }
-    }
 
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as BaseViewHolder<Group>).bind(getItem(position))
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -36,8 +37,15 @@ class GroupAdapter(): ListAdapter<Group, RecyclerView.ViewHolder>(DiffCallback()
 
     inner class ItemViewHolder(private val binding: ItemGroupBinding): BaseViewHolder<Group>(binding){
 
+        init {
+            binding.root.setOnClickListener {
+                onClick.invoke(getItem(bindingAdapterPosition))
+            }
+        }
+
         override fun bind(item: Group){
             binding.groupName.text = item.name
+            binding.card.isSelected = item.isSelected
         }
 
     }

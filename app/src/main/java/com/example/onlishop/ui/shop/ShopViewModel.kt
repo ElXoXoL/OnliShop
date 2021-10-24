@@ -8,13 +8,14 @@ import com.example.onlishop.global.Logger
 import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
 import com.example.onlishop.repository.ItemRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 
 class ShopViewModel(private val repository: ItemRepository, private val logger: Logger): BaseViewModel() {
 
     private val _groups = MutableLiveData<List<Group>>()
     val groups: LiveData<List<Group>> = _groups
+
+    val selectedGroup = MutableLiveData<Group>()
+
 
     private val _items = MutableLiveData<List<Item>>()
     val items: LiveData<List<Item>> = _items
@@ -23,13 +24,37 @@ class ShopViewModel(private val repository: ItemRepository, private val logger: 
         loadData()
     }
 
+    val bagCount = MutableLiveData<Int>()
+    fun loadBagCount(){
+        logger.logExecution("loadBagCount")
+        viewModelScope.launchIo {
+            bagCount.postValue(repository.getBagSize())
+        }
+    }
+
     private fun loadData(){
         logger.logExecution("loadData")
         viewModelScope.launchIo {
             val groups = repository.getGroups()
-            val items = repository.getItems()
-
             _groups.postValue(groups)
+
+            selectGroup(groups.first())
+        }
+    }
+
+    fun selectGroup(group: Group){
+        _groups.value?.forEach {
+            it.isSelected = false
+        }
+        group.isSelected = true
+        selectedGroup.postValue(group)
+        loadItemsForGroup(group)
+    }
+
+    private fun loadItemsForGroup(group: Group) {
+        logger.logExecution("loadItemsForGroup ${group.id}")
+        viewModelScope.launchIo {
+            val items = repository.getItemsForGroup(group.id)
             _items.postValue(items)
         }
     }

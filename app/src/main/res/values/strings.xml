@@ -1,3 +1,23 @@
 <resources>
     <string name="app_name">OnliShop</string>
+    <string name="text_add_item">Add item</string>
+    <string name="text_not_available_items">No items available</string>
+    <string name="text_sizes">Sizes:</string>
+    <string name="text_descr">Description</string>
+    <string name="text_search">Search</string>
+    <string name="text_full_name">Full name</string>
+    <string name="text_phone">Phone</string>
+    <string name="text_address_del">Delivery address</string>
+    <string name="hint_search_item">e.g. Hoodie</string>
+    <string name="hint_name">e.g. Vasyl Mykolayovich</string>
+    <string name="hint_phone">e.g. 067 123 12 12</string>
+    <string name="hint_delivery">e.g. Kyiv, NP number 228</string>
+    <string name="empty_items">No items found</string>
+    <string name="text_items_title">Items</string>
+    <string name="text_groups_title">Groups</string>
+    <string name="text_bag">Bag</string>
+    <string name="text_make_order">Make order</string>
+    <string name="text_confirm">Confirm</string>
+    <string name="text_details">Details</string>
+    <string name="text_confirmed">Thank you for order\n we will call you back</string>
 </resources>
