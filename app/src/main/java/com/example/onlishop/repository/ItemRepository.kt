@@ -8,6 +8,8 @@ interface ItemRepository {
 
     suspend fun getGroups(): List<Group>
 
+    suspend fun getGroups(groupId: Int): List<Group>
+
     suspend fun getItems(): List<Item>
 
     suspend fun getItemsForGroup(groupId: Int): List<Item>

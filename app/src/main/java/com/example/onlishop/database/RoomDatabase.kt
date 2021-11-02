@@ -1,11 +1,7 @@
 package com.example.onlishop.database
 
-import com.example.onlishop.database.daos.ShopBagItemDao
-import com.example.onlishop.database.daos.ShopGroupDao
-import com.example.onlishop.database.daos.ShopItemDao
-import com.example.onlishop.database.models.ShopBagItem
-import com.example.onlishop.database.models.ShopGroup
-import com.example.onlishop.database.models.ShopItem
+import com.example.onlishop.database.daos.*
+import com.example.onlishop.database.models.*
 
 
 class RoomDatabase(private val database: AppDatabase) {
@@ -20,7 +16,7 @@ class RoomDatabase(private val database: AppDatabase) {
 
         suspend fun getItems(groupId: Int): List<ShopItem> = dao.loadForGroup(groupId)
 
-        suspend fun getItems(search: String): List<ShopItem> = dao.loadForSearch(search)
+        suspend fun getItems(name: String): List<ShopItem> = dao.loadForSearchName(name)
 
         suspend fun getItem(itemId: Int): ShopItem? = dao.loadSingle(itemId)
 
@@ -39,6 +35,8 @@ class RoomDatabase(private val database: AppDatabase) {
         private val dao: ShopGroupDao = database.groupDao()
 
         suspend fun getItems(): List<ShopGroup> = dao.getAll()
+
+        suspend fun getByName(search: String): List<ShopGroup> = dao.loadForSearchName(search)
 
         suspend fun setItems(list: List<ShopGroup>) = dao.insertAll(list)
 
@@ -83,6 +81,54 @@ class RoomDatabase(private val database: AppDatabase) {
         }
 
         suspend fun count(): Int = dao.getItemsCount()
+
+        suspend fun nuke() = dao.nukeAll()
+
+    }
+
+    val shopOrder = ShopOrders()
+
+    inner class ShopOrders{
+
+        private val dao: ShopOrderDao = database.orderDao()
+
+        suspend fun getItems(): List<ShopOrder> = dao.getAll()
+
+        suspend fun insert(order: ShopOrder) = dao.insert(order)
+
+        suspend fun nuke() = dao.nukeAll()
+
+    }
+
+    val shopOrderItems = ShopOrderItems()
+
+    inner class ShopOrderItems{
+
+        private val dao: ShopOrderItemDao = database.orderItemDao()
+
+        suspend fun getItems(): List<ShopOrderItem> = dao.getAll()
+
+        suspend fun getForOrder(orderId: String) = dao.loadForOrder(orderId)
+
+        suspend fun addItem(item: ShopOrderItem) = dao.insert(item)
+
+        suspend fun addItems(items: List<ShopOrderItem>) = dao.insertAll(items)
+
+        suspend fun nuke() = dao.nukeAll()
+
+    }
+
+    val shopUsers = ShopUsers()
+
+    inner class ShopUsers{
+
+        private val dao: ShopUserDao = database.userDao()
+
+        suspend fun getUsers(): List<ShopUser> = dao.getAll()
+
+        suspend fun getSingle(): ShopUser? = dao.loadSingle()
+
+        suspend fun insert(item: ShopUser) = dao.insert(item)
 
         suspend fun nuke() = dao.nukeAll()
 

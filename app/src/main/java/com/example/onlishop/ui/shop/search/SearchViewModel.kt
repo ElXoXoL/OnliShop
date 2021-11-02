@@ -15,6 +15,7 @@ class SearchViewModel(private val repository: ItemRepository, private val logger
 
     private val _items = MutableLiveData<List<Item>>()
     val items: LiveData<List<Item>> = _items
+    private var lastSearch = ""
 
     val bagCount = MutableLiveData<Int>()
     fun loadBagCount(){
@@ -27,6 +28,8 @@ class SearchViewModel(private val repository: ItemRepository, private val logger
     fun setSearch(search: String){
         if (search.isEmpty()) {
             _items.postValue(emptyList())
+            return
+        } else if (selectedSearch.value == search) {
             return
         }
 

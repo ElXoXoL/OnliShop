@@ -6,11 +6,9 @@ import com.example.onlishop.base.Model
 
 @Entity
 data class ShopUser(
-    @PrimaryKey val id: Int = 0,
+    @PrimaryKey val id: String = "",
     val name: String = "",
     val phone: String = "",
     val email: String = "",
-    val preferredOrderType: String = "",
-    val lastUsedCardData: String = "",
-    val isGuest: Boolean = true,
+    val pass: String = "",
 )

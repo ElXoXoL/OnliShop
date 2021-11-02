@@ -16,7 +16,13 @@ interface ShopItemDao {
     fun loadForGroup(id: Int): List<ShopItem>
 
     @Query("SELECT * FROM shopitem WHERE name LIKE '%' || :search || '%'")
-    fun loadForSearch(search: String): List<ShopItem>
+    fun loadForSearchName(search: String): List<ShopItem>
+
+    @Query("SELECT * FROM shopitem WHERE description LIKE '%' || :search || '%'")
+    fun loadForSearchDescr(search: String): List<ShopItem>
+
+    @Query("SELECT * FROM shopitem WHERE sizes LIKE '%' || :search || '%'")
+    fun loadForSearchSizes(search: String): List<ShopItem>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(item: ShopItem)

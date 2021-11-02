@@ -6,12 +6,14 @@ import android.os.Looper
 import android.view.View
 import androidx.navigation.fragment.findNavController
 import com.example.onlishop.R
+import com.example.onlishop.app.App
 import com.example.onlishop.base.BaseFragment
 import com.example.onlishop.databinding.FragmentShopBinding
 import com.example.onlishop.global.viewBinding
 import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
 import com.example.onlishop.ui.splash.FragmentSplashDirections
+import com.example.onlishop.utils.ListItemAnimator
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -44,6 +46,7 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
 
     private fun setupView(){
         binding.btnSearch.setOnClickListener(this::onSearchClick)
+        binding.btnAccount.setOnClickListener(this::onUserClick)
         binding.bag.root.setOnClickListener(this::onBagClick)
 
         binding.dividerGroups.dividerTitle.text = getString(R.string.text_groups_title)
@@ -56,6 +59,7 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
     private fun observeViewModel(){
         viewModel.groups.observe(viewLifecycleOwner){
             groupAdapter.submitList(it)
+            viewModel.setSelected()
         }
         viewModel.items.observe(viewLifecycleOwner){
             itemsAdapter.submitList(it)
@@ -71,7 +75,7 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
         }
     }
 
-    private fun onGroupClick(item: Group) = viewModel.selectGroup(item)
+    private fun onGroupClick(item: Group) = viewModel.selectGroup(item.id)
 
     private fun onItemClick(item: Item) {
         logger.logExecution("onItemClick")
@@ -85,9 +89,24 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
         findNavController().navigate(action)
     }
 
+    private fun onUserClick(v: View? = null){
+        logger.logExecution("onUserClick")
+        val action = FragmentShopDirections.toUser()
+        findNavController().navigate(action)
+    }
+
     private fun onBagClick(v: View? = null){
         logger.logExecution("onBagClick")
         val action = FragmentShopDirections.toBag()
         findNavController().navigate(action)
+    }
+
+    override fun onBackPressed() {
+        val selectedGroup = viewModel.selectedGroup.value
+        if (selectedGroup?.parentGroupId != null){
+            viewModel.selectGroup(selectedGroup.parentGroupId)
+            return
+        }
+        super.onBackPressed()
     }
 }

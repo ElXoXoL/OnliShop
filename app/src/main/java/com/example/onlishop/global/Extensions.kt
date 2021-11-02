@@ -1,31 +1,15 @@
 package com.example.onlishop.global
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.res.Resources
-import android.graphics.Bitmap
-import android.graphics.Color
-import android.graphics.LinearGradient
-import android.graphics.Shader
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.net.Uri
-import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
-import android.view.animation.AnimationUtils
 import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.*
 import androidx.core.content.ContextCompat
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearSmoothScroller
-import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.bumptech.glide.request.RequestOptions
 import com.example.onlishop.app.App
 import com.example.onlishop.app.glide.GlideApp
 import com.google.android.play.core.tasks.Task
@@ -67,6 +51,16 @@ val Float.dp: Float
 val Float.px: Float
     get() = this * Resources.getSystem().displayMetrics.density
 
+fun View.hideKeyboard(){
+    try {
+        val imm = this.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(this.windowToken, 0)
+        this.requestFocus()
+    } catch (e: Exception) {
+        Log.d("Keyboard", e.toString())
+    }
+}
+
 fun EditText.hideKeyboard(){
     try {
         val imm = this.context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -95,3 +89,43 @@ fun String?.toast(){
 fun String?.toastLong(){
     Toast.makeText(App.instance, this, Toast.LENGTH_LONG).show()
 }
+
+val String?.formattedPhone: String
+    get() {
+        if (this.isNullOrEmpty()) return ""
+        var formattedPhone = ""
+        var counter = 0
+        this.forEach {
+            formattedPhone += it
+            when (counter) {
+                2, 5, 7 -> {
+                    formattedPhone += " "
+                }
+            }
+            counter++
+        }
+        formattedPhone = formattedPhone.trimEnd()
+        return formattedPhone
+    }
+
+val String?.cardMasked: String
+    get() {
+        if (this.isNullOrEmpty()) return ""
+        return try {
+            "**** ${substring(length - 4)}"
+        } catch (e: Exception) {
+            ""
+        }
+    }
+
+val String?.signed: String
+    get() {
+        if (this.isNullOrEmpty()) return ""
+        return "$this ₴"
+    }
+
+val Int?.signed: String
+    get() {
+        if (this == null) return ""
+        return "$this ₴"
+    }

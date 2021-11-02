@@ -6,8 +6,13 @@ import com.example.onlishop.base.Model
 
 @Entity
 data class ShopOrder(
-    @PrimaryKey val id: Int = 0,
-    val items: String = "",
-    val userId: Int = 0,
-    val isBucketOrder: Boolean = true,
+    @PrimaryKey val id: String = "",
+    val userId: String = "",
+    val name: String = "",
+    val phone: String = "",
+    val email: String = "",
+    val orderType: String = "",
+    val delivery: String = "",
+    val cardNum: String = "",
+    val date: String = "",
 )

@@ -8,6 +8,7 @@ import com.example.onlishop.base.BaseFragment
 import com.example.onlishop.databinding.FragmentBagBinding
 import com.example.onlishop.databinding.FragmentItemDetailBinding
 import com.example.onlishop.global.load
+import com.example.onlishop.global.signed
 import com.example.onlishop.global.viewBinding
 import com.example.onlishop.models.Item
 import com.example.onlishop.models.Size
@@ -59,7 +60,7 @@ class FragmentBag: BaseFragment(R.layout.fragment_bag) {
         }
 
         viewModel.fullPrice.observe(viewLifecycleOwner){
-            binding.btnMakeOrder.text = "Make order for $it grn"
+            binding.btnMakeOrder.text = getString(R.string.text_make_order, it.signed)
         }
 
     }
@@ -69,7 +70,7 @@ class FragmentBag: BaseFragment(R.layout.fragment_bag) {
             binding.btnBack.id -> onBackPressed()
             binding.btnMakeOrder.id -> {
                 logger.logExecution("btnMakeOrder")
-                val action = FragmentBagDirections.toConfirm()
+                val action = FragmentBagDirections.toOrder()
                 findNavController().navigate(action)
             }
             else -> super.onClick(v)

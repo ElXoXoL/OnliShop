@@ -2,11 +2,14 @@ package com.example.onlishop.base
 
 import android.graphics.Color
 import android.os.Build
+import android.os.Bundle
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.annotation.LayoutRes
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.example.onlishop.global.Logger
+import com.example.onlishop.global.hideKeyboard
 import com.google.android.material.textfield.TextInputEditText
 import org.koin.android.ext.android.inject
 import java.util.*
@@ -26,13 +29,27 @@ abstract class BaseFragment(@LayoutRes resource: Int): Fragment(resource), View.
         }
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        view.hideKeyboard()
+        val callback: OnBackPressedCallback =
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    onBackPressed()
+                }
+            }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+    }
+
     override fun onClick(v: View?) {
 
     }
 
     open fun onBackPressed(){
         logger.logExecution("onBackPressedFragment")
-        findNavController().popBackStack()
+        if (!findNavController().popBackStack()){
+            activity?.finish()
+        }
     }
 
 }

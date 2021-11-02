@@ -58,7 +58,7 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
         binding.btnBack.setOnClickListener(this)
         binding.bag.root.setOnClickListener(this)
 
-        binding.editSearch.showKeyboard()
+//        binding.editSearch.showKeyboard()
         binding.editSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             viewModel.setSearch(text?.toString() ?: "")
         })
@@ -70,6 +70,7 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
         itemsAdapter.registerAdapterDataObserver(SimpleAdapterDataObserver{
             isEmptyItems = itemsAdapter.itemCount == 0
         })
+        isEmptyItems = itemsAdapter.itemCount == 0
     }
 
     private fun observeViewModel(){
@@ -85,6 +86,7 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
     }
 
     private fun onItemClick(item: Item) {
+//        binding.editSearch.hideKeyboard()
         logger.logExecution("onItemClick")
         val action = FragmentSearchDirections.toDetail(itemId = item.id)
         findNavController().navigate(action)
@@ -93,7 +95,6 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
     override fun onClick(v: View?) {
         when (v?.id){
             binding.btnBack.id -> {
-                binding.editSearch.hideKeyboard()
                 onBackPressed()
             }
             binding.bag.root.id -> {

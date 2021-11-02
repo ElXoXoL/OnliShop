@@ -36,6 +36,17 @@ class ItemRepositoryImpl(
         }.await()
     }
 
+    override suspend fun getGroups(groupId: Int): List<Group> {
+        return externalScope.async(dispatcher + ignoreHandler) {
+
+            val groupsResponse = loadGroups()
+
+            val resultList = getGroupSiblingAndParent(groupId, groupsResponse).map { Group.from(it) }
+
+            resultList.sortedBy { it.id }
+        }.await()
+    }
+
     override suspend fun getItems(): List<Item> {
         return externalScope.async(dispatcher + ignoreHandler) {
             val itemsResponse = loadItems()
@@ -50,7 +61,7 @@ class ItemRepositoryImpl(
         return externalScope.async(dispatcher + ignoreHandler) {
             val items = loadItems()
             val groups = loadGroups()
-            val parents = getGroupParentsId(groupId, groups)
+            val parents = getGroupSiblingIds(groupId, groups)
 
             val resultList = mutableListOf<Item>()
             parents.forEach { groupId ->
@@ -76,9 +87,27 @@ class ItemRepositoryImpl(
     override suspend fun getSearchItems(search: String): List<Item> {
         return externalScope.async(dispatcher + ignoreHandler) {
 
-            val resultList = room.shopItems.getItems(search).map { Item.from(it) }
+            val searchLower = search.lowercase()
+            val allItems = room.shopItems.getItems()
+            val allGroups = room.shopGroups.getItems()
+            val resultList = mutableListOf<ShopItem>()
 
-            resultList.sortedBy { it.id }
+            allItems.forEach { item ->
+                when {
+                    item.name.lowercase().contains(searchLower) -> resultList.add(item)
+                    item.description.lowercase().contains(searchLower) -> resultList.add(item)
+                    item.sizes.lowercase().contains(searchLower) -> resultList.add(item)
+                }
+                val groupsBySearch = allGroups.filter { it.name.lowercase().contains(searchLower) }
+                val isGroupFounded = groupsBySearch.firstOrNull { it.id == item.groupId } != null
+                if (isGroupFounded){
+                    resultList.add(item)
+                }
+            }
+
+            val setOfItems = resultList.toSet()
+
+            setOfItems.toList().map { Item.from(it) }.sortedBy { it.id }
         }.await()
     }
 
@@ -136,7 +165,7 @@ class ItemRepositoryImpl(
         }.await()
     }
 
-    private fun getGroupParentsId(groupId: Int, groups: List<ShopGroup>): List<Int>{
+    private fun getGroupSiblingIds(groupId: Int, groups: List<ShopGroup>): List<Int>{
         val parents = mutableListOf<Int>()
         parents.add(groupId)
 
@@ -150,6 +179,23 @@ class ItemRepositoryImpl(
             }
         }
         return parents
+    }
+
+    private fun getGroupSiblingAndParent(groupId: Int, groups: List<ShopGroup>): List<ShopGroup> {
+        val list = mutableListOf<ShopGroup>()
+        val initialGroup = groups.find { it.id == groupId } ?: return emptyList()
+        list.add(initialGroup)
+
+        groups.forEach {
+            if (it.parentGroupId == initialGroup.id) {
+                list.add(it)
+            }
+        }
+
+        groups.find { it.id == initialGroup.parentGroupId }?.let {
+            list.add(0, it)
+        }
+        return list
     }
 
     private suspend fun loadGroups(): List<ShopGroup>{

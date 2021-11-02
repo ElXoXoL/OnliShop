@@ -7,6 +7,7 @@ import com.example.onlishop.R
 import com.example.onlishop.base.BaseFragment
 import com.example.onlishop.databinding.FragmentItemDetailBinding
 import com.example.onlishop.global.load
+import com.example.onlishop.global.signed
 import com.example.onlishop.global.viewBinding
 import com.example.onlishop.models.Item
 import com.example.onlishop.models.Size
@@ -17,6 +18,10 @@ import com.google.android.flexbox.FlexboxLayoutManager
 import com.google.android.flexbox.JustifyContent
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
+import androidx.activity.OnBackPressedCallback
+
+
+
 
 
 class FragmentDetail: BaseFragment(R.layout.fragment_item_detail) {
@@ -93,7 +98,7 @@ class FragmentDetail: BaseFragment(R.layout.fragment_item_detail) {
 
     private fun setItemContent(item: Item){
         binding.btnAddItem.text = if (item.sizes.isNotEmpty())
-            "${getString(R.string.text_add_item)} ${item.price} грн"
+            "${getString(R.string.text_add_item)} ${item.price.signed}"
         else
             getString(R.string.text_not_available_items)
 
