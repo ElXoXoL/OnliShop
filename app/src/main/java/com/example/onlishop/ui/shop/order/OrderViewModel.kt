@@ -60,6 +60,7 @@ class OrderViewModel(
                 orderType = orderCheck.orderType,
                 delivery = orderCheck.delivery,
                 cardNum = orderCheck.cardNum,
+                cardDate = orderCheck.cardDate,
                 date = SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date()),
                 orderItems = orderItems,
             )

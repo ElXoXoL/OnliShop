@@ -27,6 +27,7 @@ import com.example.onlishop.ui.shop.FragmentShopDirections
 import com.example.onlishop.ui.shop.ItemsAdapter
 import com.example.onlishop.ui.splash.FragmentSplashDirections
 import com.example.onlishop.utils.IdGenerator
+import com.example.onlishop.utils.LinkOpenHelper
 import com.example.onlishop.utils.PhoneWatcher
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import java.util.*
@@ -60,6 +61,8 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
 
     private fun setupView(){
         binding.btnBack.setOnClickListener(this)
+        binding.btnInfo.setOnClickListener(this)
+        binding.btnPhone.setOnClickListener(this)
 
         binding.dividerUserData.dividerTitle.text = getString(R.string.text_user_data)
         binding.dividerUserOrders.dividerTitle.text = getString(R.string.text_user_orders)
@@ -75,6 +78,10 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
     private fun setupUserRegView(){
         binding.btnUserLogin.setOnClickListener(this)
         binding.btnRegister.setOnClickListener(this)
+        binding.checkPrivacy.setOnLongClickListener {
+            LinkOpenHelper.openPrivacyPolicy(requireActivity())
+            true
+        }
 
         binding.editPhone.addTextChangedListener(phoneWatcher)
         binding.editPhone.setOnTouchListener { v, _ ->
@@ -145,6 +152,7 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
             user.pass.replace("[0-9]".toRegex(), "").isEmpty() -> false
             !user.pass.matches(".*\\d.*".toRegex()) -> false
             user.pass != user.confirmPass -> false
+            !binding.checkPrivacy.isChecked -> false
             else -> true
         }
     }
@@ -173,6 +181,12 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
                 } else {
                     getString(R.string.error_order_info).toast()
                 }
+            }
+            binding.btnInfo.id -> {
+                LinkOpenHelper.openPrivacyPolicy(requireActivity())
+            }
+            binding.btnPhone.id -> {
+                LinkOpenHelper.openHelpPhone(requireActivity())
             }
             else -> super.onClick(v)
         }

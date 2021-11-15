@@ -6,17 +6,19 @@ import com.example.onlishop.global.Logger
 import com.example.onlishop.models.*
 import com.example.onlishop.network.groups.GroupsService
 import com.example.onlishop.network.items.ItemsService
+import com.example.onlishop.utils.Crypt
 import kotlinx.coroutines.*
 import java.util.*
 
 class OrderRepositoryImpl(
     private val logger: Logger,
     private val room: RoomDatabase,
+    private val crypt: Crypt,
     private val externalScope: CoroutineScope,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : OrderRepository {
 
-    private val ignoreHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
+    private val ignoreHandler = CoroutineExceptionHandler { _, throwable ->
         logger.exception(throwable, this::class)
     }
 
@@ -28,7 +30,7 @@ class OrderRepositoryImpl(
                     val item = Item.from(room.shopItems.getItem(orderItem.id)!!)
                     OrderItem(orderItem.orderItemId, item, orderItem.size, orderItem.count)
                 }
-                Order.from(order, orderItems)
+                Order.from(order, orderItems, crypt)
             }
             ordersFormatted
         }.await()
@@ -42,11 +44,12 @@ class OrderRepositoryImpl(
                 id = order.id,
                 userId = order.userId,
                 name = order.name,
-                phone = order.phone,
-                email = order.email,
+                phone = crypt.encrypt(order.phone),
+                email = crypt.encrypt(order.email),
                 orderType = order.orderType,
-                delivery = order.delivery,
-                cardNum = order.cardNum,
+                delivery = crypt.encrypt(order.delivery),
+                cardNum = crypt.encrypt(order.cardNum),
+                cardDate = crypt.encrypt(order.cardDate),
                 date = order.date,
             )
             val orderItems = order.orderItems.map {
@@ -68,9 +71,9 @@ class OrderRepositoryImpl(
             val shopUser = ShopUser(
                 id = user.id,
                 name = user.name,
-                phone = user.phone,
-                email = user.email,
-                pass = user.pass,
+                phone = crypt.encrypt(user.phone),
+                email = crypt.encrypt(user.email),
+                pass = crypt.encrypt(user.pass),
             )
             room.shopUsers.insert(shopUser)
             true
@@ -79,7 +82,7 @@ class OrderRepositoryImpl(
 
     override suspend fun getUser(): User? {
         return externalScope.async(dispatcher + ignoreHandler) {
-            User.from(room.shopUsers.getSingle())
+            User.from(room.shopUsers.getSingle(), crypt)
         }.await()
     }
 

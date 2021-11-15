@@ -285,6 +285,18 @@
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:id="@+id/check_privacy"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                style="@style/FontedText"
+                android:text="@string/text_privacy"
+                android:textColor="@color/black"
+                android:buttonTint="@color/black"
+                app:layout_constraintTop_toBottomOf="@id/payment_card_container"
+                />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>

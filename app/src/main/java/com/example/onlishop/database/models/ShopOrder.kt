@@ -14,5 +14,6 @@ data class ShopOrder(
     val orderType: String = "",
     val delivery: String = "",
     val cardNum: String = "",
+    val cardDate: String = "",
     val date: String = "",
 )

@@ -16,7 +16,10 @@ import com.example.onlishop.base.BaseFragment
 import com.example.onlishop.databinding.FragmentOrderBinding
 import com.example.onlishop.global.*
 import com.example.onlishop.models.OrderCheck
+import com.example.onlishop.utils.Crypt
+import com.example.onlishop.utils.LinkOpenHelper
 import com.example.onlishop.utils.PhoneWatcher
+import org.koin.android.ext.android.inject
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -104,6 +107,10 @@ class FragmentOrder : BaseFragment(R.layout.fragment_order),
         binding.btnBack.setOnClickListener(this)
         binding.btnConfirm.setOnClickListener(this)
         binding.btnConfirmFull.setOnClickListener(this)
+        binding.checkPrivacy.setOnLongClickListener {
+            LinkOpenHelper.openPrivacyPolicy(requireActivity())
+            true
+        }
 
         binding.editPhone.setOnTouchListener(this)
         binding.editCardNumber.setOnTouchListener(this)
@@ -134,6 +141,7 @@ class FragmentOrder : BaseFragment(R.layout.fragment_order),
             binding.editDelivery.setText(it.delivery)
             binding.editEmail.setText(it.email)
             binding.editCardNumber.setText(it.cardNum)
+            binding.editCardDate.setText(it.cardDate)
 
             logger.logDev("ORder type : ${it.orderType}")
             if (it.orderType == "card"){
@@ -160,7 +168,8 @@ class FragmentOrder : BaseFragment(R.layout.fragment_order),
         binding.editDelivery.text?.toString() ?: "",
         cardNum,
         cardDate,
-        binding.editCardCvc.text?.toString() ?: ""
+        binding.editCardCvc.text?.toString() ?: "",
+        binding.checkPrivacy.isChecked
     )
 
     private fun checkInfo(orderCheck: OrderCheck): Boolean {
@@ -171,6 +180,7 @@ class FragmentOrder : BaseFragment(R.layout.fragment_order),
             orderCheck.email.isEmpty() -> false
             !PatternsCompat.EMAIL_ADDRESS.matcher(orderCheck.email).matches() -> false
             orderCheck.delivery.isEmpty() -> false
+            !orderCheck.isPrivacyAccepted -> false
             orderCheck.orderType == "card" -> {
                 when {
                     orderCheck.cardNum.length < 16 -> false

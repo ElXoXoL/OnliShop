@@ -15,4 +15,5 @@ data class OrderCheck(
     val cardNum: String = "",
     val cardDate: String = "",
     val cardCvc: String = "",
+    val isPrivacyAccepted: Boolean = false
 )

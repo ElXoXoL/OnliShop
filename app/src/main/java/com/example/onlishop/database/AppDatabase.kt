@@ -13,7 +13,7 @@ import com.example.onlishop.database.models.*
     ShopUser::class,
     ShopBagItem::class,
     ShopOrderItem::class,
-], version = 7
+], version = 8
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun itemDao(): ShopItemDao

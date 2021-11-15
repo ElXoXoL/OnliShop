@@ -19,6 +19,7 @@ import com.example.onlishop.ui.shop.bag.BagViewModel
 import com.example.onlishop.ui.shop.order.OrderViewModel
 import com.example.onlishop.ui.shop.search.SearchViewModel
 import com.example.onlishop.ui.user.UserViewModel
+import com.example.onlishop.utils.Crypt
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -36,6 +37,7 @@ val appModule = module {
     }
 
     single { Logger() }
+    single { Crypt("someKey", "abcdefgh")}
 
     single {
         Room.databaseBuilder(
@@ -52,7 +54,7 @@ val appModule = module {
     single<GroupsService> { GroupsServiceImpl() }
     single<ItemsService> { ItemsServiceImpl() }
     single<ItemRepository> { ItemRepositoryImpl(get(), get(), get(), get(), get(named("ExternalScope"))) }
-    single<OrderRepository> { OrderRepositoryImpl(get(), get(), get(named("ExternalOrderScope"))) }
+    single<OrderRepository> { OrderRepositoryImpl(get(), get(), get(), get(named("ExternalOrderScope"))) }
 
 
     viewModel { ShopViewModel(get(), get()) }
