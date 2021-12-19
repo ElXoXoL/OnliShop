@@ -23,6 +23,7 @@ import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
 import com.example.onlishop.models.OrderCheck
 import com.example.onlishop.models.User
+import com.example.onlishop.ui.DialogConfirm
 import com.example.onlishop.ui.shop.FragmentShopDirections
 import com.example.onlishop.ui.shop.ItemsAdapter
 import com.example.onlishop.ui.splash.FragmentSplashDirections
@@ -78,6 +79,7 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
     private fun setupUserRegView(){
         binding.btnUserLogin.setOnClickListener(this)
         binding.btnRegister.setOnClickListener(this)
+        binding.btnDelete.setOnClickListener(this)
         binding.checkPrivacy.setOnLongClickListener {
             LinkOpenHelper.openPrivacyPolicy(requireActivity())
             true
@@ -109,6 +111,12 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
         }
 
         viewModel.user.observe(viewLifecycleOwner){
+
+            if (it == null) {
+                binding.btnUserLogin.visibility = View.VISIBLE
+                binding.containerUserData.visibility = View.GONE
+                return@observe
+            }
 
             binding.btnUserLogin.visibility = View.GONE
             binding.containerUserData.visibility = View.VISIBLE
@@ -187,6 +195,21 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
             }
             binding.btnPhone.id -> {
                 LinkOpenHelper.openHelpPhone(requireActivity())
+            }
+            binding.btnDelete.id -> {
+                DialogConfirm(
+                    requireContext(),
+                    "Deleting your user",
+                    "Deleting will erase all your data, do you want to continue?",
+                    "No",
+                    "Yes",
+                    true,
+                    false
+                ) {
+                    if (it) {
+                        viewModel.removeUser()
+                    }
+                }.show()
             }
             else -> super.onClick(v)
         }

@@ -59,15 +59,30 @@
         android:overScrollMode="never"
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/top_bar"
-        app:layout_constraintBottom_toTopOf="@id/btn_make_order"
+        app:layout_constraintBottom_toTopOf="@id/discount_text"
         />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@color/black"
+        app:layout_constraintBottom_toTopOf="@id/discount_text"
+        />
+
+    <TextView
+        android:id="@+id/discount_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:gravity="center"
+        style="@style/AutoResizeText"
+        android:textColor="@color/black"
+        android:text="@string/text_bag"
+        android:maxLines="1"
+        android:ellipsize="end"
         app:layout_constraintBottom_toTopOf="@id/btn_make_order"
         />
+
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_make_order"
         android:layout_width="match_parent"

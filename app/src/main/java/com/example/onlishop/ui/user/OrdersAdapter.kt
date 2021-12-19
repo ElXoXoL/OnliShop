@@ -2,6 +2,7 @@ package com.example.onlishop.ui.user
 
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.example.onlishop.R
@@ -37,17 +38,31 @@ class OrdersAdapter: BaseAdapter<Order>(Diff()) {
             val context = binding.root.context
 
             var fullPrice = 0
+            var itemsCount = 0
             item.orderItems.forEach {
                 fullPrice += it.item.price * it.count
+                itemsCount += it.count
             }
             binding.tvOrderName.text = context.getString(R.string.text_user_name, item.name)
             binding.tvOrderId.text = context.getString(R.string.text_order_id, item.id)
-            binding.tvOrderCardNum.text = context.getString(R.string.text_order_card, item.cardNum.cardMasked)
+            binding.tvOrderCardNum.text = if (item.cardNum.cardMasked.isNotEmpty()) {
+                context.getString(R.string.text_order_card, item.cardNum.cardMasked)
+            } else {
+                context.getString(R.string.text_order_cash)
+            }
             binding.tvOrderDelivery.text = context.getString(R.string.text_order_delivery, item.delivery)
             binding.tvOrderEmail.text = context.getString(R.string.text_user_email, item.email)
-            binding.tvOrderFullPrice.text = context.getString(R.string.text_order_price, fullPrice.signed)
             binding.tvOrderPhone.text = context.getString(R.string.text_user_phone, item.phone.formattedPhone)
             binding.tvOrderDate.text = context.getString(R.string.text_order_date, item.date)
+
+            var finalPriceText = ""
+            val discountTexts = fullPrice.getDiscountText(itemsCount).split("; ").filter { it.isNotEmpty() }
+            discountTexts.forEach {
+                finalPriceText += "$it\n"
+            }
+
+            finalPriceText += context.getString(R.string.text_order_price, fullPrice.getAppliedDiscount(itemsCount).signed)
+            binding.tvOrderFullPrice.text = finalPriceText
 
             val adapter = ItemsOrderAdapter()
             binding.recItems.adapter = adapter

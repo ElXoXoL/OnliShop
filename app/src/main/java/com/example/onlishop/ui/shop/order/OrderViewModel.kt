@@ -19,6 +19,7 @@ class OrderViewModel(
 ): BaseViewModel() {
 
     val fullPrice = MutableLiveData<Int>()
+    var itemsInOrderCount = 0
     val lastOrder = MutableLiveData<Order>()
 
     init {
@@ -38,8 +39,10 @@ class OrderViewModel(
         logger.logExecution("loadFullPrice")
         viewModelScope.launchIo {
             var price = 0
+            itemsInOrderCount = 0
             repository.getBagItems().forEach {
                 price += it.count * it.item.price
+                itemsInOrderCount += it.count
             }
             fullPrice.postValue(price)
         }

@@ -86,4 +86,13 @@ class OrderRepositoryImpl(
         }.await()
     }
 
+    override suspend fun removeUser(): Boolean {
+        return externalScope.async(dispatcher + ignoreHandler) {
+            room.shopUsers.nuke()
+            room.shopOrder.nuke()
+            room.shopOrderItems.nuke()
+            return@async true
+        }.await()
+    }
+
 }

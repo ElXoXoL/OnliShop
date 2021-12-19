@@ -32,6 +32,7 @@
     <string name="text_items_title">Items</string>
     <string name="text_groups_title">Groups</string>
     <string name="text_bag">Bag</string>
+    <string name="text_cancel">Cancel</string>
     <string name="text_confirm">Confirm</string>
     <string name="text_confirm_compound">Confirm - %1$s</string>
     <string name="text_register">Register</string>
@@ -45,10 +46,11 @@
     <string name="text_order_id">Order: %1$s</string>
     <string name="text_user_email">Email: %1$s</string>
     <string name="text_order_card">Card: %1$s</string>
+    <string name="text_order_cash">Payment: By cash</string>
     <string name="text_order_date">Date: %1$s</string>
     <string name="text_order_count">Count: %1$d</string>
     <string name="text_order_delivery">Delivery: %1$s</string>
-    <string name="text_order_price">Full price: %1$s</string>
+    <string name="text_order_price">Final price: %1$s</string>
     <string name="text_price">Price: %1$s</string>
     <string name="text_make_order">Make order for %1$s</string>
     <string name="text_privacy">Privacy policy (Hold to open privacy policy)</string>

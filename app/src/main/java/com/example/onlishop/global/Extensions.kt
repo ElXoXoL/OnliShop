@@ -129,3 +129,35 @@ val Int?.signed: String
         if (this == null) return ""
         return "$this ₴"
     }
+
+fun Int.getDiscountText(itemsCount: Int): String {
+    if (itemsCount <= 1) return ""
+
+    val discount = when (itemsCount) {
+        0, 1 -> 1.0
+        2 -> 0.05
+        3 -> 0.1
+        4 -> 0.15
+        else -> 0.2
+    }
+
+    val discountValue = (this * discount).toInt()
+
+    return "Full price - ${this.signed}; Discount - ${(discount * 100).toInt()} % (-${discountValue.signed})"
+}
+
+fun Int.getAppliedDiscount(itemsCount: Int): Int {
+    if (itemsCount <= 1) return this
+
+    val discount = when (itemsCount) {
+        0, 1 -> 1.0
+        2 -> 0.05
+        3 -> 0.1
+        4 -> 0.15
+        else -> 0.2
+    }
+
+    val discountValue = (this * discount).toInt()
+
+    return this - discountValue
+}

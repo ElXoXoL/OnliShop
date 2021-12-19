@@ -2,14 +2,13 @@ package com.example.onlishop.ui.shop.bag
 
 import android.os.Bundle
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.example.onlishop.R
 import com.example.onlishop.base.BaseFragment
 import com.example.onlishop.databinding.FragmentBagBinding
 import com.example.onlishop.databinding.FragmentItemDetailBinding
-import com.example.onlishop.global.load
-import com.example.onlishop.global.signed
-import com.example.onlishop.global.viewBinding
+import com.example.onlishop.global.*
 import com.example.onlishop.models.Item
 import com.example.onlishop.models.Size
 import com.example.onlishop.ui.detail.FragmentDetailDirections
@@ -60,7 +59,13 @@ class FragmentBag: BaseFragment(R.layout.fragment_bag) {
         }
 
         viewModel.fullPrice.observe(viewLifecycleOwner){
-            binding.btnMakeOrder.text = getString(R.string.text_make_order, it.signed)
+            val discountText = it.getDiscountText(viewModel.itemsInOrderCount)
+            binding.discountText.text = discountText
+            binding.discountText.isVisible = discountText.isNotEmpty()
+            binding.btnMakeOrder.text = getString(
+                R.string.text_make_order,
+                it.getAppliedDiscount(viewModel.itemsInOrderCount).signed
+            )
         }
 
     }

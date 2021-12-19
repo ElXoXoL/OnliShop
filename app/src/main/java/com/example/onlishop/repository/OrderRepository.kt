@@ -13,4 +13,6 @@ interface OrderRepository {
     suspend fun addUser(user: User): Boolean
 
     suspend fun getUser(): User?
+
+    suspend fun removeUser(): Boolean
 }

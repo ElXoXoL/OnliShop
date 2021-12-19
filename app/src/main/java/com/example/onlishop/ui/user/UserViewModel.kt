@@ -16,8 +16,8 @@ class UserViewModel(private val repository: OrderRepository, private val logger:
     private val _items = MutableLiveData<List<Order>>()
     val items: LiveData<List<Order>> = _items
 
-    private val _user = MutableLiveData<User>()
-    val user: LiveData<User> = _user
+    private val _user = MutableLiveData<User?>()
+    val user: LiveData<User?> = _user
 
     init {
         loadOrders()
@@ -25,10 +25,19 @@ class UserViewModel(private val repository: OrderRepository, private val logger:
     }
 
     fun loadUser() {
-        logger.logExecution("loadBagCount")
+        logger.logExecution("loadUser")
         viewModelScope.launchIo {
             val user = repository.getUser() ?: return@launchIo
             _user.postValue(user)
+        }
+    }
+
+    fun removeUser() {
+        logger.logExecution("loadUser")
+        viewModelScope.launchIo {
+            repository.removeUser()
+            _user.postValue(null)
+            _items.postValue(emptyList())
         }
     }
 

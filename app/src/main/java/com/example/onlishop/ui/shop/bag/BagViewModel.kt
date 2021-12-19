@@ -17,6 +17,7 @@ class BagViewModel(private val repository: ItemRepository, private val logger: L
 
     val changedPos = MutableLiveData<Int>()
     val fullPrice = MutableLiveData<Int>()
+    var itemsInOrderCount = 0
 
     init {
         loadData()
@@ -65,8 +66,10 @@ class BagViewModel(private val repository: ItemRepository, private val logger: L
         logger.logExecution("countFullPrice")
         viewModelScope.launchIo {
             var price = 0
+            itemsInOrderCount = 0
             _items.value?.forEach {
                 price += it.count * it.item.price
+                itemsInOrderCount += it.count
             }
             fullPrice.postValue(price)
         }

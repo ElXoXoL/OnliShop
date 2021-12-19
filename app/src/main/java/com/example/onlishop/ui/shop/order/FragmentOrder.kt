@@ -10,6 +10,7 @@ import android.view.View
 import android.widget.EditText
 import android.widget.RadioGroup
 import androidx.core.util.PatternsCompat
+import androidx.core.view.isVisible
 import androidx.navigation.fragment.findNavController
 import com.example.onlishop.R
 import com.example.onlishop.base.BaseFragment
@@ -132,7 +133,13 @@ class FragmentOrder : BaseFragment(R.layout.fragment_order),
     private fun observeViewModel() {
 
         viewModel.fullPrice.observe(viewLifecycleOwner) {
-            binding.btnConfirm.text = getString(R.string.text_confirm_compound, it.signed)
+            val discountText = it.getDiscountText(viewModel.itemsInOrderCount)
+            binding.discountText.text = discountText
+            binding.discountText.isVisible = discountText.isNotEmpty()
+            binding.btnConfirm.text = getString(
+                R.string.text_confirm_compound,
+                it.getAppliedDiscount(viewModel.itemsInOrderCount).signed
+            )
         }
 
         viewModel.lastOrder.observe(viewLifecycleOwner) {
