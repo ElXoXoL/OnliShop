@@ -2,79 +2,115 @@ package com.example.onlishop.ui.shop
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.example.onlishop.base.BaseViewModel
 import com.example.onlishop.global.Logger
 import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
 import com.example.onlishop.repository.ItemRepository
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.PublishSubject
 
 class ShopViewModel(private val repository: ItemRepository, private val logger: Logger): BaseViewModel() {
 
     private val _groups = MutableLiveData<List<Group>>()
     val groups: LiveData<List<Group>> = _groups
 
-    var selectedGroupId: Int? = null
-    val selectedGroup = MutableLiveData<Group>()
+    private val subject = PublishSubject.create<Group>()
 
     private val _items = MutableLiveData<List<Item>>()
     val items: LiveData<List<Item>> = _items
 
     init {
+        subscribeItemsForGroup()
+        subscribeGroupsForGroup()
+
         loadData()
+        loadBagCount()
     }
 
     val bagCount = MutableLiveData<Int>()
-    fun loadBagCount(){
-        logger.logExecution("loadBagCount")
-        viewModelScope.launchIo {
-            bagCount.postValue(repository.getBagSize())
-        }
+
+    private fun loadBagCount() {
+        logger.logExecution("ShopViewModel loadBagCount")
+
+        repository.getBagSize()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe(
+                {
+                    logger.logDevWithThread("ShopViewModel loadBagCount onSuccess")
+                    bagCount.postValue(it)
+                }, this::baseHandler
+            ).toCache()
+
     }
 
-    private fun loadData(){
-        logger.logExecution("loadData")
-        viewModelScope.launchIo {
-            val groups = repository.getGroups()
-
-            selectGroup(groups.first().id)
-        }
+    private fun getGroupsObservable(): Observable<Group> {
+        return subject
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .distinctUntilChanged { first, second ->
+                first.id == second.id
+            }
     }
 
-    fun selectGroup(groupId: Int){
-        if (selectedGroupId == groupId) return
-        logger.logExecution("selectGroup $groupId")
-        loadItemsForGroup(groupId)
-        loadGroupsForGroup(groupId)
+    private fun loadData() {
+        logger.logExecution("ShopViewModel loadData")
+
+        repository.getGroups()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe(
+                { groups ->
+                    logger.logDevWithThread("ShopViewModel loadData onSuccess")
+                    selectGroup(groups.first())
+                }, this::baseHandler
+            ).toCache()
     }
 
-    fun setSelected(){
-        val groupId = selectedGroupId ?: return
-        _groups.value?.forEach {
-            it.isSelected = false
-        }
-        val group = _groups.value?.find { it.id == groupId }
-        group?.let {
-            it.isSelected = true
-            selectedGroup.postValue(it)
-        }
+    fun getParentOfSelected(): Group? {
+        val parentId = _groups.value?.firstOrNull { it.isSelected }?.parentGroupId
+        return _groups.value?.firstOrNull { it.id == parentId }
     }
 
-    private fun loadItemsForGroup(groupId: Int) {
-        logger.logExecution("loadItemsForGroup $groupId")
-        viewModelScope.launchIo {
-            val items = repository.getItemsForGroup(groupId)
-            _items.postValue(items)
-        }
+    fun selectGroup(group: Group) {
+        subject.onNext(group)
     }
 
-    private fun loadGroupsForGroup(groupId: Int) {
-        logger.logExecution("loadGroupsForGroup $groupId")
-        viewModelScope.launchIo {
-            val groups = repository.getGroups(groupId)
-            selectedGroupId = groupId
-            _groups.postValue(groups)
-        }
+    private fun subscribeItemsForGroup() {
+        logger.logExecution("ShopViewModel subscribeItemsForGroup")
+
+        getGroupsObservable().flatMapSingle {
+            logger.logDevWithThread("ShopViewModel subscribeItemsForGroup getGroupsObservable")
+            repository.getItemsForGroup(it.id)
+        }.subscribe(
+            { items ->
+                logger.logDevWithThread("ShopViewModel subscribeItemsForGroup onSuccess")
+                _items.postValue(items)
+            }, this::baseHandler).toCache()
+
+    }
+
+    private fun subscribeGroupsForGroup() {
+        logger.logExecution("ShopViewModel subscribeGroupsForGroup")
+
+        var groupId: Int? = null
+        getGroupsObservable().flatMapSingle {
+            logger.logDevWithThread("ShopViewModel subscribeGroupsForGroup getGroupsObservable")
+            groupId = it.id
+            repository.getGroups(it.id)
+        }.subscribe(
+            { items ->
+                logger.logDevWithThread("ShopViewModel subscribeGroupsForGroup onSuccess")
+                _groups.postValue(
+                    items.map {
+                        it.isSelected = it.id == groupId
+                        it
+                    }
+                )
+            }, this::baseHandler
+        ).toCache()
     }
 
 }

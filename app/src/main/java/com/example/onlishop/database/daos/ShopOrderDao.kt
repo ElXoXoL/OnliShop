@@ -4,20 +4,31 @@ import androidx.room.*
 import com.example.onlishop.database.models.ShopItem
 import com.example.onlishop.database.models.ShopOrder
 import com.example.onlishop.database.models.ShopUser
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface ShopOrderDao {
 
     @Query("SELECT * FROM shoporder")
-    suspend fun getAll(): List<ShopOrder>
+    fun getAll(): List<ShopOrder>
+
+    @Query("SELECT * FROM shoporder")
+    fun getAllRx(): Single<List<ShopOrder>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: ShopOrder)
+    fun insert(item: ShopOrder)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertRx(item: ShopOrder): Completable
 
     @Delete
-    suspend fun delete(item: ShopOrder)
+    fun delete(item: ShopOrder)
 
     @Query("DELETE FROM shoporder")
-    suspend fun nukeAll()
+    fun nukeAll()
+
+    @Query("DELETE FROM shoporder")
+    fun nukeAllRx(): Completable
 
 }

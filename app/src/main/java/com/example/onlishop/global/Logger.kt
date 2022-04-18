@@ -33,6 +33,10 @@ class Logger {
         log(obj, LogType.Default.name.appSigned)
     }
 
+    fun logDevWithThread(obj: Any?){
+        log("$obj thread ${Thread.currentThread().name}", LogType.Default.name.appSigned)
+    }
+
     fun logTag(obj: Any?, logTag: String){
         log(obj, logTag.appSigned)
     }

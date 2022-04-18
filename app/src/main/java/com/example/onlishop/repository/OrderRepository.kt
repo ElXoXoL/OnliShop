@@ -1,18 +1,21 @@
 package com.example.onlishop.repository
 
 import com.example.onlishop.models.*
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Single
 
 interface OrderRepository {
 
-    suspend fun getOrders(): List<Order>
+    fun getOrders(): Single<List<Order>>
 
-    suspend fun getLastOrder(): Order?
+    fun getLastOrder(): Single<Order>
 
-    suspend fun addOrder(order: Order): Boolean
+    fun addOrder(order: Order): Completable
 
-    suspend fun addUser(user: User): Boolean
+    fun addUser(user: User): Completable
 
-    suspend fun getUser(): User?
+    fun getUser(): Maybe<User>
 
-    suspend fun removeUser(): Boolean
+    fun removeUser(): Completable
 }

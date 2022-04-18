@@ -10,6 +10,11 @@ import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
 import com.example.onlishop.network.groups.GroupsService
 import com.example.onlishop.network.items.ItemsService
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
 import kotlinx.coroutines.*
 
 class ItemRepositoryImpl(
@@ -25,112 +30,111 @@ class ItemRepositoryImpl(
         logger.exception(throwable, this::class)
     }
 
-    override suspend fun getGroups(): List<Group> {
-        return externalScope.async(dispatcher + ignoreHandler) {
-
-            val groupsResponse = loadGroups()
-
-            val resultList = groupsResponse.map { Group.from(it) }
-
-            resultList.sortedBy { it.id }
-        }.await()
+    override fun getGroups(): Single<List<Group>> {
+        logger.logDevWithThread("getGroupsRx initial")
+        return loadGroupsRx().map {
+            logger.logDevWithThread("getGroupsRx map")
+            it.map { Group.from(it) }.sortedBy { it.id }
+        }
     }
 
-    override suspend fun getGroups(groupId: Int): List<Group> {
-        return externalScope.async(dispatcher + ignoreHandler) {
-
-            val groupsResponse = loadGroups()
-
-            val resultList = getGroupSiblingAndParent(groupId, groupsResponse).map { Group.from(it) }
-
-            resultList.sortedBy { it.id }
-        }.await()
+    override fun getGroups(groupId: Int): Single<List<Group>> {
+        logger.logDevWithThread("getGroupsRx-groupId initial")
+        return loadGroupsRx().map { groups ->
+            logger.logDevWithThread("getGroupsRx-groupId map")
+            getGroupSiblingAndParent(groupId, groups)
+                .map { Group.from(it) }
+                .sortedBy { it.id }
+        }
     }
 
-    override suspend fun getItems(): List<Item> {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            val itemsResponse = loadItems()
+    override fun getItemsForGroup(groupId: Int): Single<List<Item>> {
+        logger.logDevWithThread("getItemsForGroupRx initial")
 
-            val resultList = itemsResponse.map { Item.from(it) }
-
-            resultList.sortedBy { it.id }
-        }.await()
-    }
-
-    override suspend fun getItemsForGroup(groupId: Int): List<Item> {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            val items = loadItems()
-            val groups = loadGroups()
+        // Loads items first to save them to DB
+        return loadItemsRx().flatMap {
+            logger.logDevWithThread("getItemsForGroupRx flatMap 1")
+            loadGroupsRx()
+        }.map { groups ->
+            logger.logDevWithThread("getItemsForGroupRx map 2")
             val parents = getGroupSiblingIds(groupId, groups)
 
-            val resultList = mutableListOf<Item>()
+            val resultList = mutableListOf<ShopItem>()
             parents.forEach { groupId ->
-                resultList.addAll(
-                    room.shopItems.getItems(groupId).map { Item.from(it) }
-                )
+//                logger.logDevWithThread("parents.forEach $groupId ")
+                val items = room.shopItems.getItems(groupId)
+//                logger.logDevWithThread("parents.forEach itemsCount ${items.size}")
+
+                resultList.addAll(items)
             }
 
-            resultList.sortedBy { it.id }
-        }.await()
+            logger.logDevWithThread("getItemsForGroupRx map 2 result")
+
+            resultList.map {
+//                    logger.logDevWithThread("Thread map - ")
+                Item.from(it)
+            }.sortedBy { it.id }
+        }
     }
 
-    override suspend fun getItem(itemId: Int): Item {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            val item = room.shopItems.getItem(itemId)
-                ?: itemsService.getItems().find { it.id == itemId }
-                ?: throw Exception("Can't find item")
-
-            Item.from(item)
-        }.await()
+    override fun getItem(itemId: Int): Single<Item> {
+        logger.logDevWithThread("getItemRx initial")
+        return room.shopItems.getItemRx(itemId)
+            .switchIfEmpty(
+                itemsService.getItemsRx().map {
+                    it.first { it.id == itemId }
+                }
+            ).map {
+                Item.from(it)
+            }
     }
 
-    override suspend fun getSearchItems(search: String): List<Item> {
-        return externalScope.async(dispatcher + ignoreHandler) {
+    override fun getSearchItems(search: String): Single<List<Item>> {
+        logger.logDevWithThread("getSearchItemsRx initial")
+        val searchLower = search.lowercase()
+        return room.shopItems.getItemsRx().map { items ->
+            logger.logDevWithThread("getSearchItemsRx map")
 
-            val searchLower = search.lowercase()
-            val allItems = room.shopItems.getItems()
             val allGroups = room.shopGroups.getItems()
+            val groupsBySearch = allGroups.filter { it.name.lowercase().contains(searchLower) }
             val resultList = mutableListOf<ShopItem>()
 
-            allItems.forEach { item ->
+
+            items.forEach { item ->
                 when {
                     item.name.lowercase().contains(searchLower) -> resultList.add(item)
                     item.description.lowercase().contains(searchLower) -> resultList.add(item)
                     item.sizes.lowercase().contains(searchLower) -> resultList.add(item)
-                }
-                val groupsBySearch = allGroups.filter { it.name.lowercase().contains(searchLower) }
-                val isGroupFounded = groupsBySearch.firstOrNull { it.id == item.groupId } != null
-                if (isGroupFounded){
-                    resultList.add(item)
+                    else -> {
+                        val isGroupFounded =
+                            groupsBySearch.firstOrNull { it.id == item.groupId } != null
+                        if (isGroupFounded) {
+                            resultList.add(item)
+                        }
+                    }
                 }
             }
 
-            val setOfItems = resultList.toSet()
-
-            setOfItems.toList().map { Item.from(it) }.sortedBy { it.id }
-        }.await()
-    }
-
-    override suspend fun addBagItem(item: Item, size: String): Boolean {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            room.shopBag.addItem(
-                ShopBagItem(item.id, size)
-            )
-            true
-        }.await()
-    }
-
-    override suspend fun removeBagItem(bagItemId: Int) {
-        externalScope.launch(dispatcher + ignoreHandler) {
-            room.shopBag.removeItem(bagItemId)
+            resultList.map { Item.from(it) }.sortedBy { it.id }
         }
     }
 
-    override suspend fun getBagItems(): List<BagItem> {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            val bagItems = room.shopBag.getItems()
-            val resultList = mutableListOf<BagItem>()
+    override fun addBagItem(item: Item, size: String): Completable {
+        logger.logDevWithThread("addBagItemRx initial")
+        return room.shopBag.addItemRx(ShopBagItem(item.id, size))
+    }
 
+    override fun removeBagItem(bagItemId: Int): Completable {
+        logger.logDevWithThread("removeBagItemRx initial")
+        return room.shopBag.removeItemRx(bagItemId)
+    }
+
+    override fun getBagItems(): Flowable<List<BagItem>> {
+        logger.logDevWithThread("getBagItemsRx initial")
+        return room.shopBag.getItemsRx().map { bagItems ->
+            logger.logDevWithThread("getBagItemsRx map")
+
+            val resultList = mutableListOf<BagItem>()
             bagItems.forEach { bagItem ->
                 room.shopItems.getItem(bagItem.id)?.let { shopItem ->
                     val item = Item.from(shopItem)
@@ -144,36 +148,32 @@ class ItemRepositoryImpl(
                     )
                 }
             }
-
             resultList
-        }.await()
-    }
-
-    override suspend fun cleanBag() {
-        externalScope.launch(dispatcher + ignoreHandler) {
-            room.shopBag.nuke()
         }
     }
 
-    override suspend fun getBagSize(): Int {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            var size = 0
-            room.shopBag.getItems().forEach {
-                size += it.count
-            }
-            size
-        }.await()
+    override fun cleanBag(): Completable {
+        logger.logDevWithThread("cleanBag initial")
+        return room.shopBag.nuke()
     }
 
-    private fun getGroupSiblingIds(groupId: Int, groups: List<ShopGroup>): List<Int>{
+    override fun getBagSize(): Flowable<Int> {
+        logger.logDevWithThread("getBagSizeRx initial")
+        return room.shopBag.getItemsRx().map {
+            it.sumOf { it.count }
+        }
+    }
+
+    private fun getGroupSiblingIds(groupId: Int, groups: List<ShopGroup>): List<Int> {
+        logger.logDevWithThread("getGroupSiblingIds initial")
         val parents = mutableListOf<Int>()
         parents.add(groupId)
 
         var counter = 0
-        while (counter < parents.size){
+        while (counter < parents.size) {
             val parentId = parents[counter++]
             groups.forEach {
-                if (it.parentGroupId == parentId){
+                if (it.parentGroupId == parentId) {
                     parents.add(it.id)
                 }
             }
@@ -182,6 +182,7 @@ class ItemRepositoryImpl(
     }
 
     private fun getGroupSiblingAndParent(groupId: Int, groups: List<ShopGroup>): List<ShopGroup> {
+        logger.logDevWithThread("getGroupSiblingAndParent initial")
         val list = mutableListOf<ShopGroup>()
         val initialGroup = groups.find { it.id == groupId } ?: return emptyList()
         list.add(initialGroup)
@@ -198,28 +199,50 @@ class ItemRepositoryImpl(
         return list
     }
 
-    private suspend fun loadGroups(): List<ShopGroup>{
-        val isDbEmpty = room.shopGroups.count() <= 0
+    private fun loadGroupsRx(): Single<List<ShopGroup>> {
+        logger.logDevWithThread("loadGroupsRx initial")
+        return room.shopGroups.countRx()
+            .subscribeOn(Schedulers.io())
+            .flatMap {
+                logger.logDevWithThread("loadGroupsRx flatMap")
+                val isDbEmpty = it <= 0
 
-        return  if (isDbEmpty){
-            val items = groupsService.getGroups()
-            room.shopGroups.setItems(items)
-            items
-        } else {
-            room.shopGroups.getItems()
-        }
+                if (isDbEmpty) {
+                    groupsService.getGroupsRx()
+                        .map { groups ->
+                            logger.logDevWithThread("groupsService.getGroupsRx() flatMap 1")
+                            room.shopGroups.setItemsRx(groups)
+                            logger.logDevWithThread("groupsService.getGroupsRx() flatMap 2")
+                            groups
+                        }
+                } else {
+                    logger.logDevWithThread("room.shopGroups.getItemsRx()")
+                    room.shopGroups.getItemsRx()
+                }.subscribeOn(Schedulers.computation())
+            }
     }
 
-    private suspend fun loadItems(): List<ShopItem> {
-        val isDbEmpty = room.shopItems.count() <= 0
+    private fun loadItemsRx(): Single<List<ShopItem>> {
+        logger.logDevWithThread("loadItemsRx initial")
+        return room.shopItems.countRx()
+            .subscribeOn(Schedulers.io())
+            .flatMap {
+                logger.logDevWithThread("loadItemsRx flatMap")
+                val isDbEmpty = it <= 0
 
-        return if (isDbEmpty) {
-            val items = itemsService.getItems()
-            room.shopItems.setItems(items)
-            items
-        } else {
-            room.shopItems.getItems()
-        }
+                if (isDbEmpty) {
+                    itemsService.getItemsRx()
+                        .flatMap { items ->
+                            logger.logDevWithThread("itemsService.getItemsRx() flatMap 1")
+                            room.shopItems.setItemsRx(items)
+                            logger.logDevWithThread("itemsService.getItemsRx() flatMap 2")
+                            room.shopItems.getItemsRx()
+                        }
+                } else {
+                    logger.logDevWithThread("room.shopItems.getItemsRx()")
+                    room.shopItems.getItemsRx()
+                }.subscribeOn(Schedulers.computation())
+            }
     }
 
 }

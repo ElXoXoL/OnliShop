@@ -13,17 +13,17 @@ import com.example.onlishop.global.signed
 import com.example.onlishop.models.BagItem
 
 class ItemsBagAdapter(
-    private val onMinus: (bagItem: BagItem, pos: Int) -> Unit,
-    private val onPlus: (bagItem: BagItem, pos: Int) -> Unit,
+    private val onMinus: (bagItem: BagItem) -> Unit,
+    private val onPlus: (bagItem: BagItem) -> Unit,
 ): BaseAdapter<BagItem>(Diff()) {
 
     class Diff: DiffUtil.ItemCallback<BagItem>(){
-        override fun areItemsTheSame(p0: BagItem, p1: BagItem): Boolean {
-            return p0 == p1
+        override fun areItemsTheSame(first: BagItem, second: BagItem): Boolean {
+            return first.bagItemId == second.bagItemId && first.size == second.size
         }
 
-        override fun areContentsTheSame(p0: BagItem, p1: BagItem): Boolean {
-            return p0.count == p1.count
+        override fun areContentsTheSame(first: BagItem, second: BagItem): Boolean {
+            return first.count == second.count
         }
 
     }
@@ -37,10 +37,10 @@ class ItemsBagAdapter(
 
         init {
             binding.btnMinus.setOnClickListener{
-                onMinus.invoke(getItem(bindingAdapterPosition), bindingAdapterPosition)
+                onMinus.invoke(getItem(bindingAdapterPosition))
             }
             binding.btnPlus.setOnClickListener{
-                onPlus.invoke(getItem(bindingAdapterPosition), bindingAdapterPosition)
+                onPlus.invoke(getItem(bindingAdapterPosition))
             }
         }
 

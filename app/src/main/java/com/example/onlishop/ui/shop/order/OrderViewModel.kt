@@ -1,14 +1,13 @@
 package com.example.onlishop.ui.shop.order
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.example.onlishop.base.BaseViewModel
 import com.example.onlishop.global.Logger
 import com.example.onlishop.models.*
 import com.example.onlishop.repository.ItemRepository
 import com.example.onlishop.repository.OrderRepository
 import com.example.onlishop.utils.IdGenerator
+import io.reactivex.rxjava3.schedulers.Schedulers
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -27,58 +26,87 @@ class OrderViewModel(
         loadLastOrder()
     }
 
-    private fun loadLastOrder(){
+    private fun loadLastOrder() {
         logger.logExecution("loadLastOrder")
-        viewModelScope.launchIo {
-            val order = orderRepository.getLastOrder() ?: return@launchIo
-            lastOrder.postValue(order)
-        }
-    }
 
-    private fun loadFullPrice(){
-        logger.logExecution("loadFullPrice")
-        viewModelScope.launchIo {
-            var price = 0
-            itemsInOrderCount = 0
-            repository.getBagItems().forEach {
-                price += it.count * it.item.price
-                itemsInOrderCount += it.count
-            }
-            fullPrice.postValue(price)
-        }
-    }
-
-    fun saveOrder(orderCheck: OrderCheck){
-        logger.logExecution("cleanBag")
-        viewModelScope.launchIo {
-            val bagItems = repository.getBagItems()
-            val orderItems = bagItems.map {
-                OrderItem(it.bagItemId, it.item, it.size, it.count)
-            }
-            val order = Order(
-                id = IdGenerator.randomId,
-                name = orderCheck.name,
-                phone = orderCheck.phone,
-                email = orderCheck.email,
-                orderType = orderCheck.orderType,
-                delivery = orderCheck.delivery,
-                cardNum = orderCheck.cardNum,
-                cardDate = orderCheck.cardDate,
-                date = SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date()),
-                orderItems = orderItems,
+        orderRepository.getLastOrder()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe(
+                {
+                    logger.logDevWithThread("loadLastOrder onSuccess")
+                    lastOrder.postValue(it)
+                }, this::baseHandler
             )
-
-            orderRepository.addOrder(order)
-
-            cleanBag()
-        }
+            .toCache()
     }
 
-    fun cleanBag(){
+    private fun loadFullPrice() {
+        logger.logExecution("loadFullPrice")
+
+        repository.getBagItems()
+            .firstOrError()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe(
+                {
+                    logger.logDevWithThread("OrderViewModel loadFullPrice onSuccess")
+                    itemsInOrderCount = it.sumOf { it.count }
+                    this.fullPrice.postValue(
+                        it.sumOf { it.count * it.item.price }
+                    )
+                }, {
+                    logger.logDevWithThread("OrderViewModel loadFullPrice error $it")
+                    itemsInOrderCount = 0
+                    this.fullPrice.postValue(0)
+                }).toCache()
+
+    }
+
+    fun saveOrder(orderCheck: OrderCheck) {
+        logger.logExecution("saveOrder")
+
+        repository.getBagItems()
+            .firstOrError()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .flatMapCompletable { bagItems ->
+
+                val orderItems = bagItems.map {
+                    OrderItem(it.bagItemId, it.item, it.size, it.count)
+                }
+                val order = Order(
+                    id = IdGenerator.randomId,
+                    name = orderCheck.name,
+                    phone = orderCheck.phone,
+                    email = orderCheck.email,
+                    orderType = orderCheck.orderType,
+                    delivery = orderCheck.delivery,
+                    cardNum = orderCheck.cardNum,
+                    cardDate = orderCheck.cardDate,
+                    date = SimpleDateFormat("dd/MM/yy", Locale.getDefault()).format(Date()),
+                    orderItems = orderItems,
+                )
+
+                orderRepository.addOrder(order)
+            }
+            .subscribe(
+                {
+                    logger.logDevWithThread("OrderViewModel saveOrder onSuccess")
+                    cleanBag()
+                }, this::baseHandler
+            ).toCache()
+
+    }
+
+    fun cleanBag() {
         logger.logExecution("cleanBag")
-        viewModelScope.launchIo {
-            repository.cleanBag()
-        }
+
+        repository.cleanBag()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe({}, this::baseHandler)
+            .toCache()
     }
 
 }

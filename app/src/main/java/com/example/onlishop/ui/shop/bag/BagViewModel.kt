@@ -2,77 +2,67 @@ package com.example.onlishop.ui.shop.bag
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
 import com.example.onlishop.base.BaseViewModel
 import com.example.onlishop.global.Logger
 import com.example.onlishop.models.BagItem
-import com.example.onlishop.models.Group
-import com.example.onlishop.models.Item
 import com.example.onlishop.repository.ItemRepository
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class BagViewModel(private val repository: ItemRepository, private val logger: Logger): BaseViewModel() {
 
     private val _items = MutableLiveData<List<BagItem>>()
     val items: LiveData<List<BagItem>> = _items
 
-    val changedPos = MutableLiveData<Int>()
     val fullPrice = MutableLiveData<Int>()
     var itemsInOrderCount = 0
+        private set
 
     init {
         loadData()
     }
 
-    private fun loadData(){
-        logger.logExecution("loadData")
-        viewModelScope.launchIo {
-            val items = repository.getBagItems()
-            _items.postValue(items)
-        }
+    private fun loadData() {
+        logger.logExecution("BagViewModel loadData")
+
+        repository.getBagItems()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .map {
+                logger.logDevWithThread("BagViewModel loadData map")
+                itemsInOrderCount = it.sumOf { it.count }
+                this.fullPrice.postValue(
+                    it.sumOf { it.count * it.item.price }
+                )
+
+                it
+            }.subscribe(
+                {
+                    logger.logDevWithThread("BagViewModel loadData onSuccess")
+                    _items.postValue(it)
+                }, this::baseHandler
+            ).toCache()
+
     }
 
-    fun removeItem(bagItem: BagItem, pos: Int){
+    fun removeItem(bagItem: BagItem){
         logger.logExecution("removeItem")
-        viewModelScope.launchIo {
-            repository.removeBagItem(bagItem.bagItemId)
-            val item = _items.value?.get(pos)
-            item?.let {
-                it.count = it.count - 1
-            }
 
-            if (item != null && item.count <= 0){
-                val currentItems = _items.value?.toMutableList()
-                currentItems?.removeAt(pos)
-                _items.postValue(currentItems ?: emptyList())
-            } else {
-                changedPos.postValue(pos)
-            }
-        }
+        repository.removeBagItem(bagItem.bagItemId)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe({}, this::baseHandler)
+            .toCache()
+
     }
 
-    fun addItem(bagItem: BagItem, pos: Int){
+    fun addItem(bagItem: BagItem){
         logger.logExecution("addItem")
-        viewModelScope.launchIo {
-            repository.addBagItem(bagItem.item, bagItem.size)
-            val item = _items.value?.get(pos)
-            item?.let {
-                it.count = it.count + 1
-            }
-            changedPos.postValue(pos)
-        }
-    }
 
-    fun countFullPrice(){
-        logger.logExecution("countFullPrice")
-        viewModelScope.launchIo {
-            var price = 0
-            itemsInOrderCount = 0
-            _items.value?.forEach {
-                price += it.count * it.item.price
-                itemsInOrderCount += it.count
-            }
-            fullPrice.postValue(price)
-        }
+        repository.addBagItem(bagItem.item, bagItem.size)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe({}, this::baseHandler)
+            .toCache()
     }
 
 }

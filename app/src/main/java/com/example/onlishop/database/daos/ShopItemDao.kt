@@ -2,18 +2,31 @@ package com.example.onlishop.database.daos
 
 import androidx.room.*
 import com.example.onlishop.database.models.ShopItem
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface ShopItemDao {
 
     @Query("SELECT * FROM shopitem")
-    suspend fun getAll(): List<ShopItem>
+    fun getAll(): List<ShopItem>
+
+    @Query("SELECT * FROM shopitem")
+    fun getAllRx(): Single<List<ShopItem>>
 
     @Query("SELECT * FROM shopitem WHERE id=:id")
     fun loadSingle(id: Int): ShopItem?
 
+    @Query("SELECT * FROM shopitem WHERE id=:id")
+    fun loadSingleRx(id: Int): Maybe<ShopItem>
+
     @Query("SELECT * FROM shopitem WHERE groupId=:id")
     fun loadForGroup(id: Int): List<ShopItem>
+
+    @Query("SELECT * FROM shopitem WHERE groupId=:id")
+    fun loadForGroupRx(id: Int): Observable<List<ShopItem>>
 
     @Query("SELECT * FROM shopitem WHERE name LIKE '%' || :search || '%'")
     fun loadForSearchName(search: String): List<ShopItem>
@@ -25,21 +38,27 @@ interface ShopItemDao {
     fun loadForSearchSizes(search: String): List<ShopItem>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: ShopItem)
+    fun insert(item: ShopItem)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(list: List<ShopItem>)
+    fun insertAll(list: List<ShopItem>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAllRx(list: List<ShopItem>)
 
     @Query("SELECT COUNT(id) FROM shopitem")
     fun getItemsCount(): Int
 
+    @Query("SELECT COUNT(id) FROM shopitem")
+    fun getItemsCountRx(): Single<Int>
+
     @Delete
-    suspend fun delete(item: ShopItem)
+    fun delete(item: ShopItem)
 
     @Update
-    suspend fun update(item: ShopItem)
+    fun update(item: ShopItem)
 
     @Query("DELETE FROM shopitem")
-    suspend fun nukeAll()
+    fun nukeAll()
 
 }

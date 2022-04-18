@@ -54,8 +54,6 @@ class FragmentDetail: BaseFragment(R.layout.fragment_item_detail) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-
-        viewModel.loadBagCount()
     }
 
     private fun setupView(){

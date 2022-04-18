@@ -1,12 +1,24 @@
 package com.example.onlishop.network.items
 
 import com.example.onlishop.R
+import com.example.onlishop.app.App
 import com.example.onlishop.database.models.ShopGroup
 import com.example.onlishop.database.models.ShopItem
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 
 class ItemsServiceImpl: ItemsService {
 
     override fun getItems(): List<ShopItem> {
+        return getMockList()
+    }
+
+    override fun getItemsRx(): Single<List<ShopItem>> {
+        App.logger.logDevWithThread("getItemsRx service")
+        return Single.just(getMockList())
+    }
+
+    private fun getMockList(): List<ShopItem> {
         return listOf(
             ShopItem(
                 id = 1,

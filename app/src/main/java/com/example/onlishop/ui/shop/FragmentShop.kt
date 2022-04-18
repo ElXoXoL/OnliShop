@@ -14,6 +14,8 @@ import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
 import com.example.onlishop.ui.splash.FragmentSplashDirections
 import com.example.onlishop.utils.ListItemAnimator
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.schedulers.Schedulers
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -40,8 +42,6 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-
-        viewModel.loadBagCount()
     }
 
     private fun setupView(){
@@ -59,15 +59,10 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
     private fun observeViewModel(){
         viewModel.groups.observe(viewLifecycleOwner){
             groupAdapter.submitList(it)
-            viewModel.setSelected()
+            binding.groupName.text = it.firstOrNull { it.isSelected }?.name
         }
         viewModel.items.observe(viewLifecycleOwner){
             itemsAdapter.submitList(it)
-        }
-
-        viewModel.selectedGroup.observe(viewLifecycleOwner){
-            binding.groupName.text = it.name
-            groupAdapter.notifyDataSetChanged()
         }
 
         viewModel.bagCount.observe(viewLifecycleOwner){
@@ -75,7 +70,7 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
         }
     }
 
-    private fun onGroupClick(item: Group) = viewModel.selectGroup(item.id)
+    private fun onGroupClick(item: Group) = viewModel.selectGroup(item)
 
     private fun onItemClick(item: Item) {
         logger.logExecution("onItemClick")
@@ -102,11 +97,13 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
     }
 
     override fun onBackPressed() {
-        val selectedGroup = viewModel.selectedGroup.value
-        if (selectedGroup?.parentGroupId != null){
-            viewModel.selectGroup(selectedGroup.parentGroupId)
+        val parentGroup = viewModel.getParentOfSelected()
+
+        if (parentGroup != null){
+            viewModel.selectGroup(parentGroup)
             return
         }
         super.onBackPressed()
+
     }
 }

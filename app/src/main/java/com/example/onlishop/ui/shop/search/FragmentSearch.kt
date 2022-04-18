@@ -1,25 +1,16 @@
 package com.example.onlishop.ui.shop.search
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
-import android.view.inputmethod.EditorInfo
 import androidx.core.widget.addTextChangedListener
 import androidx.navigation.fragment.findNavController
 import com.example.onlishop.R
 import com.example.onlishop.base.BaseFragment
 import com.example.onlishop.base.SimpleAdapterDataObserver
 import com.example.onlishop.databinding.FragmentSearchBinding
-import com.example.onlishop.databinding.FragmentShopBinding
-import com.example.onlishop.global.hideKeyboard
-import com.example.onlishop.global.showKeyboard
 import com.example.onlishop.global.viewBinding
-import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
-import com.example.onlishop.ui.shop.FragmentShopDirections
 import com.example.onlishop.ui.shop.ItemsAdapter
-import com.example.onlishop.ui.splash.FragmentSplashDirections
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -51,14 +42,12 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-        viewModel.loadBagCount()
     }
 
     private fun setupView(){
         binding.btnBack.setOnClickListener(this)
         binding.bag.root.setOnClickListener(this)
 
-//        binding.editSearch.showKeyboard()
         binding.editSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
             viewModel.setSearch(text?.toString() ?: "")
         })

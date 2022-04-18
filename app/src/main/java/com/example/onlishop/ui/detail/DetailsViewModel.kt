@@ -8,6 +8,7 @@ import com.example.onlishop.global.Logger
 import com.example.onlishop.models.Item
 import com.example.onlishop.models.Size
 import com.example.onlishop.repository.ItemRepository
+import io.reactivex.rxjava3.schedulers.Schedulers
 
 class DetailsViewModel(
     private val repository: ItemRepository,
@@ -20,31 +21,49 @@ class DetailsViewModel(
     private val _item = MutableLiveData<Item>()
     val item: LiveData<Item> = _item
 
+    val bagCount = MutableLiveData<Int>()
+
     init {
         loadItem()
+        loadBagCount()
     }
 
-    private fun loadItem(){
-        logger.logExecution("loadItem")
-        viewModelScope.launchIo {
-            if (itemId == -1) throw Exception("Can't find item")
-
-            val item = repository.getItem(itemId)
-
-            _item.postValue(item)
-            sizes.postValue(item.sizes)
-        }
+    override fun initOnFragmentCreated() {
+        super.initOnFragmentCreated()
     }
 
-    val bagCount = MutableLiveData<Int>()
-    fun loadBagCount(){
-        logger.logExecution("loadBagCount")
-        viewModelScope.launchIo {
-            bagCount.postValue(repository.getBagSize())
-        }
+    private fun loadItem() {
+        logger.logExecution("DetailsViewModel loadItem")
+
+        repository.getItem(itemId)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe(
+                {
+                    _item.postValue(it)
+                    sizes.postValue(it.sizes)
+                    logger.logDevWithThread("DetailsViewModel loadItem onSuccess")
+                }, this::baseHandler
+            ).toCache()
+
     }
 
-    fun selectSize(pos: Int){
+    private fun loadBagCount() {
+        logger.logExecution("DetailsViewModel loadBagCount")
+
+        repository.getBagSize()
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe(
+                {
+                    logger.logDevWithThread("DetailsViewModel loadBagCount onSuccess")
+                    bagCount.postValue(it)
+                }, this::baseHandler
+            ).toCache()
+
+    }
+
+    fun selectSize(pos: Int) {
         logger.logExecution("selectSize")
         viewModelScope.launchIo {
             val currentSizes = sizes.value ?: return@launchIo
@@ -58,14 +77,21 @@ class DetailsViewModel(
         }
     }
 
-    fun addItem(){
+    fun addItem() {
         logger.logExecution("addItem")
-        viewModelScope.launchIo {
-            val item = _item.value ?: return@launchIo
-            val size = sizes.value?.firstOrNull { it.isSelected } ?: return@launchIo
-            repository.addBagItem(item, size.size)
-            loadBagCount()
-        }
+
+        val item = _item.value ?: return
+        val size = sizes.value?.firstOrNull { it.isSelected } ?: return
+
+        repository.addBagItem(item, size.size)
+            .subscribeOn(Schedulers.computation())
+            .observeOn(Schedulers.computation())
+            .subscribe(
+                {
+                    logger.logDevWithThread("addItem onSuccess")
+                }, this::baseHandler
+            ).toCache()
+
     }
 
 }

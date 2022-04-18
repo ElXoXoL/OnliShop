@@ -1,6 +1,7 @@
 package com.example.onlishop.app
 
 import android.app.Application
+import com.example.onlishop.database.RoomDatabase
 import com.example.onlishop.global.Logger
 import com.example.onlishop.koin.app
 import org.koin.android.ext.android.get

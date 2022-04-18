@@ -13,8 +13,7 @@ class User(
     val confirmPass: String = "",
 ): Model() {
     companion object {
-        fun from(shopUser: ShopUser?, crypt: Crypt): User? {
-            if (shopUser == null) return null
+        fun from(shopUser: ShopUser, crypt: Crypt): User {
             return User(
                 id = shopUser.id,
                 name = shopUser.name,

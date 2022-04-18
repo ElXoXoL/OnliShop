@@ -150,7 +150,7 @@ class FragmentOrder : BaseFragment(R.layout.fragment_order),
             binding.editCardNumber.setText(it.cardNum)
             binding.editCardDate.setText(it.cardDate)
 
-            logger.logDev("ORder type : ${it.orderType}")
+            logger.logDev("Order type : ${it.orderType}")
             if (it.orderType == "card"){
                 binding.radioCard.isChecked = true
             }
@@ -168,15 +168,15 @@ class FragmentOrder : BaseFragment(R.layout.fragment_order),
     }
 
     private fun getOrderCheck(): OrderCheck = OrderCheck(
-        binding.editName.text?.toString() ?: "",
-        phoneWatcher.phone,
-        binding.editEmail.text?.toString() ?: "",
-        if (checkedId == binding.radioCard.id) "card" else "cash",
-        binding.editDelivery.text?.toString() ?: "",
-        cardNum,
-        cardDate,
-        binding.editCardCvc.text?.toString() ?: "",
-        binding.checkPrivacy.isChecked
+        name = binding.editName.text?.toString() ?: "",
+        phone = phoneWatcher.phone,
+        email = binding.editEmail.text?.toString() ?: "",
+        orderType = if (checkedId == binding.radioCard.id) "card" else "cash",
+        delivery = binding.editDelivery.text?.toString() ?: "",
+        cardNum = cardNum,
+        cardDate = cardDate,
+        cardCvc = binding.editCardCvc.text?.toString() ?: "",
+        isPrivacyAccepted = binding.checkPrivacy.isChecked
     )
 
     private fun checkInfo(orderCheck: OrderCheck): Boolean {

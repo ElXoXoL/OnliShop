@@ -1,136 +1,175 @@
 package com.example.onlishop.database
 
+import com.example.onlishop.app.App
+import com.example.onlishop.app.App.Companion.logger
 import com.example.onlishop.database.daos.*
 import com.example.onlishop.database.models.*
+import io.reactivex.rxjava3.core.*
 
 
-class RoomDatabase(private val database: AppDatabase) {
+class RoomDatabase(val database: AppDatabase) {
 
     val shopItems = ShopItems()
 
-    inner class ShopItems{
+    inner class ShopItems {
 
         private val dao: ShopItemDao = database.itemDao()
 
-        suspend fun getItems(): List<ShopItem> = dao.getAll()
+        fun getItems(): List<ShopItem> = dao.getAll()
 
-        suspend fun getItems(groupId: Int): List<ShopItem> = dao.loadForGroup(groupId)
+        fun getItemsRx(): Single<List<ShopItem>> {
+            App.logger.logDevWithThread("getItemsRx DB")
+            return dao.getAllRx()
+        }
 
-        suspend fun getItems(name: String): List<ShopItem> = dao.loadForSearchName(name)
+        fun getItems(groupId: Int): List<ShopItem> = dao.loadForGroup(groupId)
 
-        suspend fun getItem(itemId: Int): ShopItem? = dao.loadSingle(itemId)
+        fun getItemsRx(groupId: Int): Observable<List<ShopItem>> = dao.loadForGroupRx(groupId)
 
-        suspend fun setItems(list: List<ShopItem>) = dao.insertAll(list)
+        fun getItems(name: String): List<ShopItem> = dao.loadForSearchName(name)
 
-        suspend fun count(): Int = dao.getItemsCount()
+        fun getItem(itemId: Int): ShopItem? = dao.loadSingle(itemId)
 
-        suspend fun nuke() = dao.nukeAll()
+        fun getItemRx(itemId: Int): Maybe<ShopItem> = dao.loadSingleRx(itemId)
+
+        fun setItemsRx(list: List<ShopItem>) = dao.insertAllRx(list)
+
+        fun count(): Int = dao.getItemsCount()
+
+        fun countRx(): Single<Int> {
+            App.logger.logDevWithThread("countRx DB")
+            return dao.getItemsCountRx()
+        }
+
+        fun nuke() = dao.nukeAll()
 
     }
 
     val shopGroups = ShopGroups()
 
-    inner class ShopGroups{
+    inner class ShopGroups {
 
         private val dao: ShopGroupDao = database.groupDao()
 
-        suspend fun getItems(): List<ShopGroup> = dao.getAll()
+        fun getItems(): List<ShopGroup> = dao.getAll()
 
-        suspend fun getByName(search: String): List<ShopGroup> = dao.loadForSearchName(search)
+        fun getItemsRx(): Single<List<ShopGroup>> = dao.getAllRx()
 
-        suspend fun setItems(list: List<ShopGroup>) = dao.insertAll(list)
+        fun getByName(search: String): List<ShopGroup> = dao.loadForSearchName(search)
 
-        suspend fun count(): Int = dao.getItemsCount()
+        fun setItemsRx(list: List<ShopGroup>) = dao.insertAllRx(list)
 
-        suspend fun nuke() = dao.nukeAll()
+        fun countRx(): Single<Int> = dao.getItemsCountRx()
+
+        fun nuke() = dao.nukeAll()
 
     }
 
     val shopBag = ShopBag()
 
-    inner class ShopBag{
+    inner class ShopBag {
 
         private val dao: ShopBagItemDao = database.bagDao()
 
-        suspend fun getItems(): List<ShopBagItem> = dao.getAll()
+        fun getItemsRx(): Flowable<List<ShopBagItem>> = dao.getAllRx()
 
-        suspend fun setItems(list: List<ShopBagItem>) = dao.insertAll(list)
+        fun setItems(list: List<ShopBagItem>) = dao.insertAll(list)
 
-        suspend fun addItem(item: ShopBagItem) {
-            val itemFromDao = dao.loadSingle(item.id, item.size)
-            if (itemFromDao != null){
-                val itemAdd = itemFromDao.copy(count = itemFromDao.count + 1)
-                dao.insert(itemAdd)
-            } else {
-                dao.insert(item)
-            }
-        }
+        fun addItemRx(item: ShopBagItem): Completable {
+            App.logger.logDevWithThread("addItemRx item")
 
-        suspend fun removeItem(bagItemId: Int){
-            val itemFromDao = dao.loadSingle(bagItemId)
-            if (itemFromDao != null){
-                val itemAdd = itemFromDao.copy(count = itemFromDao.count - 1)
-                if (itemAdd.count <= 0){
-                    dao.delete(bagItemId)
+            return Single.just(item).flatMapCompletable {
+                App.logger.logDevWithThread("addItemRx item2")
+                val itemFromDao = dao.loadSingle(it.id, it.size)
+
+                if (itemFromDao != null) {
+                    val itemAdd = itemFromDao.copy(count = itemFromDao.count + 1)
+                    dao.insertRx(itemAdd)
                 } else {
-                    dao.insert(itemAdd)
+                    dao.insertRx(it)
                 }
-            } else {
-                dao.delete(bagItemId)
             }
         }
 
-        suspend fun count(): Int = dao.getItemsCount()
+        fun removeItemRx(bagItemId: Int): Completable {
+            App.logger.logDevWithThread("removeItemRx item")
 
-        suspend fun nuke() = dao.nukeAll()
+            return Single.just(bagItemId).flatMapCompletable {
+                App.logger.logDevWithThread("removeItemRx item2")
+
+                val itemFromDao = dao.loadSingle(it)
+                if (itemFromDao != null) {
+                    val itemAdd = itemFromDao.copy(count = itemFromDao.count - 1)
+                    if (itemAdd.count <= 0) {
+                        dao.deleteRx(it)
+                    } else {
+                        dao.insertRx(itemAdd)
+                    }
+                } else {
+                    dao.deleteRx(it)
+                }
+            }
+        }
+
+
+        fun count(): Int = dao.getItemsCount()
+
+        fun nuke() = dao.nukeAll()
 
     }
 
     val shopOrder = ShopOrders()
 
-    inner class ShopOrders{
+    inner class ShopOrders {
 
         private val dao: ShopOrderDao = database.orderDao()
 
-        suspend fun getItems(): List<ShopOrder> = dao.getAll()
+        fun getItemsRx(): Single<List<ShopOrder>> = dao.getAllRx()
 
-        suspend fun insert(order: ShopOrder) = dao.insert(order)
+        fun insertRx(order: ShopOrder): Completable {
+            logger.logDevWithThread("insertRx from Completable.mergeArray")
+            return dao.insertRx(order)
+        }
 
-        suspend fun nuke() = dao.nukeAll()
+        fun nukeRx() = dao.nukeAllRx()
+
 
     }
 
     val shopOrderItems = ShopOrderItems()
 
-    inner class ShopOrderItems{
+    inner class ShopOrderItems {
 
         private val dao: ShopOrderItemDao = database.orderItemDao()
 
-        suspend fun getItems(): List<ShopOrderItem> = dao.getAll()
+        fun getItems(): List<ShopOrderItem> = dao.getAll()
 
-        suspend fun getForOrder(orderId: String) = dao.loadForOrder(orderId)
+        fun getForOrder(orderId: String) = dao.loadForOrder(orderId)
 
-        suspend fun addItem(item: ShopOrderItem) = dao.insert(item)
+        fun addItem(item: ShopOrderItem) = dao.insert(item)
 
-        suspend fun addItems(items: List<ShopOrderItem>) = dao.insertAll(items)
+        fun addItemsRx(items: List<ShopOrderItem>): Completable {
+            logger.logDevWithThread("addItemsRx from Completable.mergeArray")
+            return dao.insertAllRx(items)
+        }
 
-        suspend fun nuke() = dao.nukeAll()
+        fun nukeRx() = dao.nukeAllRx()
 
     }
 
     val shopUsers = ShopUsers()
 
-    inner class ShopUsers{
+    inner class ShopUsers {
 
         private val dao: ShopUserDao = database.userDao()
 
-        suspend fun getUsers(): List<ShopUser> = dao.getAll()
+        fun getUsers(): List<ShopUser> = dao.getAll()
 
-        suspend fun getSingle(): ShopUser? = dao.loadSingle()
+        fun getSingleRx(): Maybe<ShopUser> = dao.loadSingleRx()
 
-        suspend fun insert(item: ShopUser) = dao.insert(item)
+        fun insert(item: ShopUser) = dao.insert(item)
 
-        suspend fun nuke() = dao.nukeAll()
+        fun nukeRx() = dao.nukeAllRx()
 
     }
 }

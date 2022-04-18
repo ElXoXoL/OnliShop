@@ -1,10 +1,22 @@
 package com.example.onlishop.network.groups
 
+import com.example.onlishop.app.App
 import com.example.onlishop.database.models.ShopGroup
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 
 class GroupsServiceImpl: GroupsService {
 
     override fun getGroups(): List<ShopGroup> {
+        return getMockList()
+    }
+
+    override fun getGroupsRx(): Single<List<ShopGroup>> {
+        App.logger.logDevWithThread("getGroupsRx service")
+        return Single.just(getMockList())
+    }
+
+    private fun getMockList(): List<ShopGroup> {
         return listOf(
             ShopGroup(
                 id = 0,

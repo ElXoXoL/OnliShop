@@ -4,11 +4,11 @@ import com.example.onlishop.database.RoomDatabase
 import com.example.onlishop.database.models.*
 import com.example.onlishop.global.Logger
 import com.example.onlishop.models.*
-import com.example.onlishop.network.groups.GroupsService
-import com.example.onlishop.network.items.ItemsService
 import com.example.onlishop.utils.Crypt
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.Single
 import kotlinx.coroutines.*
-import java.util.*
 
 class OrderRepositoryImpl(
     private val logger: Logger,
@@ -22,9 +22,10 @@ class OrderRepositoryImpl(
         logger.exception(throwable, this::class)
     }
 
-    override suspend fun getOrders(): List<Order> {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            val orders = room.shopOrder.getItems()
+    override fun getOrders(): Single<List<Order>> {
+        logger.logDevWithThread("getOrdersRx initial")
+        return room.shopOrder.getItemsRx().map { orders ->
+            logger.logDevWithThread("getOrdersRx map")
             val ordersFormatted = orders.map { order ->
                 val orderItems = room.shopOrderItems.getForOrder(order.id).map { orderItem ->
                     val item = Item.from(room.shopItems.getItem(orderItem.id)!!)
@@ -32,14 +33,23 @@ class OrderRepositoryImpl(
                 }
                 Order.from(order, orderItems, crypt)
             }
+            logger.logDevWithThread("getOrdersRx map2")
             ordersFormatted
-        }.await()
+        }
     }
 
-    override suspend fun getLastOrder(): Order? = getOrders().lastOrNull()
+    override fun getLastOrder(): Single<Order> {
+        logger.logDevWithThread("getLastOrderRx initial")
+        return getOrders().map {
+            logger.logDevWithThread("getLastOrderRx map")
+            it.last()
+        }
+    }
 
-    override suspend fun addOrder(order: Order): Boolean {
-        return externalScope.async(dispatcher + ignoreHandler) {
+    override fun addOrder(order: Order): Completable {
+        logger.logDevWithThread("addOrderRx initial")
+        return Single.just(order).flatMapCompletable { order ->
+            logger.logDevWithThread("addOrderRx flatMapCompletable")
             val shopOrder = ShopOrder(
                 id = order.id,
                 userId = order.userId,
@@ -60,14 +70,18 @@ class OrderRepositoryImpl(
                     orderId = order.id
                 )
             }
-            room.shopOrder.insert(shopOrder)
-            room.shopOrderItems.addItems(orderItems)
-            true
-        }.await()
+
+
+            logger.logDevWithThread("addOrderRx Completable.mergeArray")
+            Completable.mergeArray(
+                room.shopOrder.insertRx(shopOrder),
+                room.shopOrderItems.addItemsRx(orderItems)
+            )
+        }
     }
 
-    override suspend fun addUser(user: User): Boolean {
-        return externalScope.async(dispatcher + ignoreHandler) {
+    override fun addUser(user: User): Completable {
+        return Single.just(user).flatMapCompletable {
             val shopUser = ShopUser(
                 id = user.id,
                 name = user.name,
@@ -75,24 +89,23 @@ class OrderRepositoryImpl(
                 email = crypt.encrypt(user.email),
                 pass = crypt.encrypt(user.pass),
             )
+
             room.shopUsers.insert(shopUser)
-            true
-        }.await()
+        }
     }
 
-    override suspend fun getUser(): User? {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            User.from(room.shopUsers.getSingle(), crypt)
-        }.await()
+    override fun getUser(): Maybe<User> {
+        return room.shopUsers.getSingleRx().map {
+            User.from(it, crypt)
+        }
     }
 
-    override suspend fun removeUser(): Boolean {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            room.shopUsers.nuke()
-            room.shopOrder.nuke()
-            room.shopOrderItems.nuke()
-            return@async true
-        }.await()
+    override fun removeUser(): Completable {
+        return Completable.mergeArray(
+            room.shopUsers.nukeRx(),
+            room.shopOrder.nukeRx(),
+            room.shopOrderItems.nukeRx(),
+        )
     }
 
 }

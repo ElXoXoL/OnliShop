@@ -3,29 +3,31 @@ package com.example.onlishop.repository
 import com.example.onlishop.models.BagItem
 import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 
 interface ItemRepository {
 
-    suspend fun getGroups(): List<Group>
+    fun getGroups(): Single<List<Group>>
 
-    suspend fun getGroups(groupId: Int): List<Group>
+    fun getGroups(groupId: Int): Single<List<Group>>
 
-    suspend fun getItems(): List<Item>
+    fun getItemsForGroup(groupId: Int): Single<List<Item>>
 
-    suspend fun getItemsForGroup(groupId: Int): List<Item>
+    fun getItem(itemId: Int): Single<Item>
 
-    suspend fun getItem(itemId: Int): Item
+    fun getSearchItems(search: String): Single<List<Item>>
 
-    suspend fun getSearchItems(search: String): List<Item>
+    fun addBagItem(item: Item, size: String): Completable
 
-    suspend fun addBagItem(item: Item, size: String): Boolean
+    fun removeBagItem(bagItemId: Int): Completable
 
-    suspend fun removeBagItem(bagItemId: Int)
+    fun getBagSize(): Flowable<Int>
 
-    suspend fun getBagSize(): Int
+    fun getBagItems(): Flowable<List<BagItem>>
 
-    suspend fun getBagItems(): List<BagItem>
-
-    suspend fun cleanBag()
+    fun cleanBag(): Completable
 
 }

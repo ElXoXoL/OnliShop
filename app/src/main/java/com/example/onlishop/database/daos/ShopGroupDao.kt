@@ -3,12 +3,18 @@ package com.example.onlishop.database.daos
 import androidx.room.*
 import com.example.onlishop.database.models.ShopGroup
 import com.example.onlishop.database.models.ShopItem
+import io.reactivex.rxjava3.core.Completable
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
 
 @Dao
 interface ShopGroupDao {
 
     @Query("SELECT * FROM shopgroup")
-    suspend fun getAll(): List<ShopGroup>
+    fun getAll(): List<ShopGroup>
+
+    @Query("SELECT * FROM shopgroup")
+    fun getAllRx(): Single<List<ShopGroup>>
 
     @Query("SELECT * FROM shopgroup WHERE id=:id")
     fun loadSingle(id: Int): ShopGroup?
@@ -20,21 +26,27 @@ interface ShopGroupDao {
     fun loadForSearchName(search: String): List<ShopGroup>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: ShopGroup)
+    fun insert(item: ShopGroup)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(list: List<ShopGroup>)
+    fun insertAll(list: List<ShopGroup>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insertAllRx(list: List<ShopGroup>): Completable
 
     @Query("SELECT COUNT(id) FROM shopgroup")
     fun getItemsCount(): Int
 
+    @Query("SELECT COUNT(id) FROM shopgroup")
+    fun getItemsCountRx(): Single<Int>
+
     @Delete
-    suspend fun delete(item: ShopGroup)
+    fun delete(item: ShopGroup)
 
     @Update
-    suspend fun update(item: ShopGroup)
+    fun update(item: ShopGroup)
 
     @Query("DELETE FROM shopgroup")
-    suspend fun nukeAll()
+    fun nukeAll()
 
 }
