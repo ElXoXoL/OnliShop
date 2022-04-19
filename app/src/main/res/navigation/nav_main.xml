@@ -27,14 +27,15 @@
         android:name="com.example.onlishop.ui.shop.FragmentShop"
         android:label="FragmentShop"
         tools:layout="@layout/fragment_shop">
-                <action
-                    android:id="@+id/toDetail"
-                    app:destination="@id/fragmentDetail"
-                    app:enterAnim="@anim/item_anim_fall_from_bottom"
-                    app:exitAnim="@anim/hold"
-                    app:popEnterAnim="@anim/hold"
-                    app:popExitAnim="@anim/item_anim_fall_to_bottom"
-                    app:popUpTo="@id/fragmentShop" />
+
+        <action
+            android:id="@+id/toDetail"
+            app:destination="@id/fragmentDetail"
+            app:enterAnim="@anim/item_anim_fall_from_bottom"
+            app:exitAnim="@anim/hold"
+            app:popEnterAnim="@anim/hold"
+            app:popExitAnim="@anim/item_anim_fall_to_bottom"
+            app:popUpTo="@id/fragmentShop" />
         <action
             android:id="@+id/toSearch"
             app:destination="@id/fragmentSearch"
@@ -69,7 +70,7 @@
         android:label="fragmentSearch"
         tools:layout="@layout/fragment_search">
         <action
-            android:id="@+id/toDetail"
+            android:id="@+id/toDetailFromSearch"
             app:destination="@id/fragmentDetail"
             app:enterAnim="@anim/item_anim_fall_from_bottom"
             app:exitAnim="@anim/hold"

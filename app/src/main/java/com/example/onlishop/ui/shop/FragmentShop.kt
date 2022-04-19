@@ -74,7 +74,8 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
 
     private fun onItemClick(item: Item) {
         logger.logExecution("onItemClick")
-        val action = FragmentShopDirections.toDetail(itemId = item.id)
+        val action = FragmentShopDirections.toDetail()
+        action.itemId = item.id
         findNavController().navigate(action)
     }
 

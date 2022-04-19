@@ -77,7 +77,8 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
     private fun onItemClick(item: Item) {
 //        binding.editSearch.hideKeyboard()
         logger.logExecution("onItemClick")
-        val action = FragmentSearchDirections.toDetail(itemId = item.id)
+        val action = FragmentSearchDirections.toDetailFromSearch()
+        action.itemId = item.id
         findNavController().navigate(action)
     }
 
