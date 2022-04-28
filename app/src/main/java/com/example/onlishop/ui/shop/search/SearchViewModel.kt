@@ -33,8 +33,8 @@ class SearchViewModel(private val repository: ItemRepository, private val logger
         logger.logExecution("SearchViewModel loadBagCount")
 
         repository.getBagSize()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe({
                 logger.logDevWithThread("SearchViewModel loadBagCount onSuccess ")
                 bagCount.postValue(it)
@@ -60,8 +60,8 @@ class SearchViewModel(private val repository: ItemRepository, private val logger
                     Single.just(emptyList())
                 }
             }
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribeWith(object : Observer<List<Item>> {
 
                 override fun onSubscribe(d: Disposable) {

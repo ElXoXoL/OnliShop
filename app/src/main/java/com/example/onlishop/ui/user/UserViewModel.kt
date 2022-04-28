@@ -26,8 +26,8 @@ class UserViewModel(private val repository: OrderRepository, private val logger:
         logger.logExecution("loadUser")
 
         repository.getUser()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe({
                 logger.logDevWithThread("UserViewModel loadUser onSuccess")
                 _user.postValue(it)
@@ -41,8 +41,8 @@ class UserViewModel(private val repository: OrderRepository, private val logger:
         logger.logExecution("removeUser")
 
         repository.removeUser()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe({
                 logger.logDevWithThread("UserViewModel removeUser onSuccess")
                 _user.postValue(null)
@@ -60,8 +60,8 @@ class UserViewModel(private val repository: OrderRepository, private val logger:
                 logger.logDevWithThread("UserViewModel loadOrders map")
                 it.reversed()
             }
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe({ orders ->
                 logger.logDevWithThread("UserViewModel loadOrders onSuccess")
                 _items.postValue(orders)
@@ -73,8 +73,8 @@ class UserViewModel(private val repository: OrderRepository, private val logger:
     fun saveUser(user: User) {
         logger.logExecution("saveUser")
         repository.addUser(user)
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe({
                 logger.logDevWithThread("UserViewModel saveUser onSuccess")
                 loadUser()

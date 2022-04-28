@@ -35,8 +35,8 @@ class ShopViewModel(private val repository: ItemRepository, private val logger: 
         logger.logExecution("ShopViewModel loadBagCount")
 
         repository.getBagSize()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe(
                 {
                     logger.logDevWithThread("ShopViewModel loadBagCount onSuccess")
@@ -48,8 +48,8 @@ class ShopViewModel(private val repository: ItemRepository, private val logger: 
 
     private fun getGroupsObservable(): Observable<Group> {
         return subject
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .distinctUntilChanged { first, second ->
                 first.id == second.id
             }
@@ -59,8 +59,8 @@ class ShopViewModel(private val repository: ItemRepository, private val logger: 
         logger.logExecution("ShopViewModel loadData")
 
         repository.getGroups()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe(
                 { groups ->
                     logger.logDevWithThread("ShopViewModel loadData onSuccess")

@@ -36,8 +36,8 @@ class DetailsViewModel(
         logger.logExecution("DetailsViewModel loadItem")
 
         repository.getItem(itemId)
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe(
                 {
                     _item.postValue(it)
@@ -52,8 +52,8 @@ class DetailsViewModel(
         logger.logExecution("DetailsViewModel loadBagCount")
 
         repository.getBagSize()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe(
                 {
                     logger.logDevWithThread("DetailsViewModel loadBagCount onSuccess")
@@ -84,8 +84,8 @@ class DetailsViewModel(
         val size = sizes.value?.firstOrNull { it.isSelected } ?: return
 
         repository.addBagItem(item, size.size)
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe(
                 {
                     logger.logDevWithThread("addItem onSuccess")

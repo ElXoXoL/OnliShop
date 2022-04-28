@@ -218,7 +218,7 @@ class ItemRepositoryImpl(
                 } else {
                     logger.logDevWithThread("room.shopGroups.getItemsRx()")
                     room.shopGroups.getItemsRx()
-                }.subscribeOn(Schedulers.computation())
+                }.subscribeOn(Schedulers.io())
             }
     }
 
@@ -241,7 +241,7 @@ class ItemRepositoryImpl(
                 } else {
                     logger.logDevWithThread("room.shopItems.getItemsRx()")
                     room.shopItems.getItemsRx()
-                }.subscribeOn(Schedulers.computation())
+                }.subscribeOn(Schedulers.io())
             }
     }
 

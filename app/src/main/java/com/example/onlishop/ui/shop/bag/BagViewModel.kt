@@ -25,8 +25,8 @@ class BagViewModel(private val repository: ItemRepository, private val logger: L
         logger.logExecution("BagViewModel loadData")
 
         repository.getBagItems()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .map {
                 logger.logDevWithThread("BagViewModel loadData map")
                 itemsInOrderCount = it.sumOf { it.count }
@@ -48,8 +48,8 @@ class BagViewModel(private val repository: ItemRepository, private val logger: L
         logger.logExecution("removeItem")
 
         repository.removeBagItem(bagItem.bagItemId)
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe({}, this::baseHandler)
             .toCache()
 
@@ -59,8 +59,8 @@ class BagViewModel(private val repository: ItemRepository, private val logger: L
         logger.logExecution("addItem")
 
         repository.addBagItem(bagItem.item, bagItem.size)
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe({}, this::baseHandler)
             .toCache()
     }

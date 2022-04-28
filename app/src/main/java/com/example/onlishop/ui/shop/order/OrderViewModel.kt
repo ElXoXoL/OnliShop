@@ -30,8 +30,8 @@ class OrderViewModel(
         logger.logExecution("loadLastOrder")
 
         orderRepository.getLastOrder()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe(
                 {
                     logger.logDevWithThread("loadLastOrder onSuccess")
@@ -46,8 +46,8 @@ class OrderViewModel(
 
         repository.getBagItems()
             .firstOrError()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe(
                 {
                     logger.logDevWithThread("OrderViewModel loadFullPrice onSuccess")
@@ -68,8 +68,8 @@ class OrderViewModel(
 
         repository.getBagItems()
             .firstOrError()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .flatMapCompletable { bagItems ->
 
                 val orderItems = bagItems.map {
@@ -103,8 +103,8 @@ class OrderViewModel(
         logger.logExecution("cleanBag")
 
         repository.cleanBag()
-            .subscribeOn(Schedulers.computation())
-            .observeOn(Schedulers.computation())
+            .subscribeOn(Schedulers.io())
+            .observeOn(Schedulers.io())
             .subscribe({}, this::baseHandler)
             .toCache()
     }
