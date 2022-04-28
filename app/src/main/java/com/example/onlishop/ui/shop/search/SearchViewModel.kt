@@ -6,15 +6,19 @@ import com.example.onlishop.base.BaseViewModel
 import com.example.onlishop.global.Logger
 import com.example.onlishop.models.Item
 import com.example.onlishop.repository.ItemRepository
+import io.reactivex.rxjava3.core.Observer
+import io.reactivex.rxjava3.core.Single
 import io.reactivex.rxjava3.core.SingleObserver
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.rxjava3.subjects.PublishSubject
+import java.util.concurrent.TimeUnit
 
 class SearchViewModel(private val repository: ItemRepository, private val logger: Logger): BaseViewModel() {
 
     private val _items = MutableLiveData<List<Item>>()
     val items: LiveData<List<Item>> = _items
-    private var lastSearch = ""
+    private val lastSearchSubject: PublishSubject<String> = PublishSubject.create()
 
     private var searchDisposable: Disposable? = null
 
@@ -22,6 +26,7 @@ class SearchViewModel(private val repository: ItemRepository, private val logger
 
     init {
         loadBagCount()
+        loadItemsSearch()
     }
 
     private fun loadBagCount() {
@@ -39,24 +44,26 @@ class SearchViewModel(private val repository: ItemRepository, private val logger
     }
 
     fun setSearch(search: String) {
-        if (search.isEmpty()) {
-            _items.postValue(emptyList())
-            return
-        } else if (lastSearch == search) {
-            return
-        }
-
-        lastSearch = search
-        loadItemsSearch(search)
+        lastSearchSubject.onNext(search)
     }
 
-    private fun loadItemsSearch(search: String) {
+    private fun loadItemsSearch() {
         logger.logExecution("SearchViewModel loadItemsSearch")
 
-        repository.getSearchItems(search)
+        lastSearchSubject
+            .debounce(500, TimeUnit.MILLISECONDS)
+            .distinctUntilChanged()
+            .flatMapSingle {
+                if (!it.isNullOrEmpty()) {
+                    repository.getSearchItems(it)
+                } else {
+                    Single.just(emptyList())
+                }
+            }
             .subscribeOn(Schedulers.computation())
             .observeOn(Schedulers.computation())
-            .subscribeWith(object : SingleObserver<List<Item>> {
+            .subscribeWith(object : Observer<List<Item>> {
+
                 override fun onSubscribe(d: Disposable) {
                     if (searchDisposable != null && searchDisposable?.isDisposed == false) {
                         searchDisposable?.dispose()
@@ -65,13 +72,17 @@ class SearchViewModel(private val repository: ItemRepository, private val logger
                     logger.logDevWithThread("SearchViewModel loadItemsSearch onSubscribe")
                 }
 
-                override fun onSuccess(items: List<Item>) {
-                    logger.logDevWithThread("SearchViewModel loadItemsSearch onSuccess")
+                override fun onError(e: Throwable) {
+                    baseHandler(e)
+                }
+
+                override fun onNext(items: List<Item>) {
+                    logger.logDevWithThread("SearchViewModel loadItemsSearch onNext")
                     _items.postValue(items)
                 }
 
-                override fun onError(e: Throwable) {
-                    baseHandler(e)
+                override fun onComplete() {
+                    logger.logDevWithThread("SearchViewModel loadItemsSearch onComplete")
                 }
 
             })

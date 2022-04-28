@@ -1,21 +1,15 @@
 package com.example.onlishop.ui.shop
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
 import androidx.navigation.fragment.findNavController
 import com.example.onlishop.R
-import com.example.onlishop.app.App
 import com.example.onlishop.base.BaseFragment
 import com.example.onlishop.databinding.FragmentShopBinding
 import com.example.onlishop.global.viewBinding
 import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
-import com.example.onlishop.ui.splash.FragmentSplashDirections
-import com.example.onlishop.utils.ListItemAnimator
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.schedulers.Schedulers
+import com.example.onlishop.utils.DefaultAndTranslateAnimator
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -52,7 +46,9 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
         binding.dividerGroups.dividerTitle.text = getString(R.string.text_groups_title)
         binding.dividerItems.dividerTitle.text = getString(R.string.text_items_title)
 
+        binding.recGroups.itemAnimator = DefaultAndTranslateAnimator(0.2f, false)
         binding.recGroups.adapter = groupAdapter
+        binding.recItems.itemAnimator = DefaultAndTranslateAnimator(0.2f, true)
         binding.recItems.adapter = itemsAdapter
     }
 

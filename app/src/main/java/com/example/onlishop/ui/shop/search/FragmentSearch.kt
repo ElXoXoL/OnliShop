@@ -11,6 +11,7 @@ import com.example.onlishop.databinding.FragmentSearchBinding
 import com.example.onlishop.global.viewBinding
 import com.example.onlishop.models.Item
 import com.example.onlishop.ui.shop.ItemsAdapter
+import com.example.onlishop.utils.DefaultAndTranslateAnimator
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -54,6 +55,7 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
 
         binding.dividerItems.dividerTitle.text = getString(R.string.text_items_title)
 
+        binding.recItems.itemAnimator = DefaultAndTranslateAnimator(0.2f, true)
         binding.recItems.adapter = itemsAdapter
 
         itemsAdapter.registerAdapterDataObserver(SimpleAdapterDataObserver{
