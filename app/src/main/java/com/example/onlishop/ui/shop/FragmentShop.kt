@@ -13,6 +13,7 @@ import com.example.onlishop.global.viewBinding
 import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
 import com.example.onlishop.ui.splash.FragmentSplashDirections
+import com.example.onlishop.utils.DefaultAndTranslateAnimator
 import com.example.onlishop.utils.ListItemAnimator
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -27,7 +28,7 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
 
     private var bagCount: Int = 0
         set(value) {
-            if (value > 0){
+            if (value > 0) {
                 binding.bag.root.visibility = View.VISIBLE
                 binding.bag.bagSize.text = value.toString()
             } else {
@@ -40,11 +41,9 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-
-        viewModel.loadBagCount()
     }
 
-    private fun setupView(){
+    private fun setupView() {
         binding.btnSearch.setOnClickListener(this::onSearchClick)
         binding.btnAccount.setOnClickListener(this::onUserClick)
         binding.bag.root.setOnClickListener(this::onBagClick)
@@ -52,25 +51,26 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
         binding.dividerGroups.dividerTitle.text = getString(R.string.text_groups_title)
         binding.dividerItems.dividerTitle.text = getString(R.string.text_items_title)
 
+        binding.recGroups.itemAnimator = DefaultAndTranslateAnimator(0.2f, false)
         binding.recGroups.adapter = groupAdapter
+        binding.recItems.itemAnimator = DefaultAndTranslateAnimator(0.2f, true)
         binding.recItems.adapter = itemsAdapter
     }
 
-    private fun observeViewModel(){
-        viewModel.groups.observe(viewLifecycleOwner){
+    private fun observeViewModel() {
+        viewModel.groups.observe(viewLifecycleOwner) {
             groupAdapter.submitList(it)
-            viewModel.setSelected()
         }
-        viewModel.items.observe(viewLifecycleOwner){
+
+        viewModel.items.observe(viewLifecycleOwner) {
             itemsAdapter.submitList(it)
         }
 
-        viewModel.selectedGroup.observe(viewLifecycleOwner){
+        viewModel.selectedGroup.observe(viewLifecycleOwner) {
             binding.groupName.text = it.name
-            groupAdapter.notifyDataSetChanged()
         }
 
-        viewModel.bagCount.observe(viewLifecycleOwner){
+        viewModel.bagCount.observe(viewLifecycleOwner) {
             bagCount = it
         }
     }
@@ -79,23 +79,24 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
 
     private fun onItemClick(item: Item) {
         logger.logExecution("onItemClick")
-        val action = FragmentShopDirections.toDetail(itemId = item.id)
+        val action = FragmentShopDirections.toDetail()
+        action.itemId = item.id
         findNavController().navigate(action)
     }
 
-    private fun onSearchClick(v: View? = null){
+    private fun onSearchClick(v: View? = null) {
         logger.logExecution("onSearchClick")
         val action = FragmentShopDirections.toSearch()
         findNavController().navigate(action)
     }
 
-    private fun onUserClick(v: View? = null){
+    private fun onUserClick(v: View? = null) {
         logger.logExecution("onUserClick")
         val action = FragmentShopDirections.toUser()
         findNavController().navigate(action)
     }
 
-    private fun onBagClick(v: View? = null){
+    private fun onBagClick(v: View? = null) {
         logger.logExecution("onBagClick")
         val action = FragmentShopDirections.toBag()
         findNavController().navigate(action)
@@ -103,7 +104,7 @@ class FragmentShop: BaseFragment(R.layout.fragment_shop) {
 
     override fun onBackPressed() {
         val selectedGroup = viewModel.selectedGroup.value
-        if (selectedGroup?.parentGroupId != null){
+        if (selectedGroup?.parentGroupId != null) {
             viewModel.selectGroup(selectedGroup.parentGroupId)
             return
         }

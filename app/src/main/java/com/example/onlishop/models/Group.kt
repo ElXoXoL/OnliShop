@@ -3,7 +3,7 @@ package com.example.onlishop.models
 import com.example.onlishop.base.Model
 import com.example.onlishop.database.models.ShopGroup
 
-class Group (
+data class Group (
         val id: Int = 0,
         val parentGroupId: Int? = null,
         val name: String = "",

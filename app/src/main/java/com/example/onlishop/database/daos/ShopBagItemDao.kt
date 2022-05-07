@@ -2,9 +2,13 @@ package com.example.onlishop.database.daos
 
 import androidx.room.*
 import com.example.onlishop.database.models.ShopBagItem
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ShopBagItemDao {
+
+    @Query("SELECT * FROM ShopBagItem")
+    fun getAllFlow(): Flow<List<ShopBagItem>>
 
     @Query("SELECT * FROM ShopBagItem")
     suspend fun getAll(): List<ShopBagItem>

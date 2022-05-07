@@ -2,7 +2,7 @@ package com.example.onlishop.models
 
 import com.example.onlishop.base.Model
 
-class Size(
+data class Size(
     val size: String = "",
     var isSelected: Boolean = false
 ): Model()

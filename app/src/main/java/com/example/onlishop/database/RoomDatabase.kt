@@ -2,6 +2,7 @@ package com.example.onlishop.database
 
 import com.example.onlishop.database.daos.*
 import com.example.onlishop.database.models.*
+import kotlinx.coroutines.flow.Flow
 
 
 class RoomDatabase(private val database: AppDatabase) {
@@ -54,6 +55,8 @@ class RoomDatabase(private val database: AppDatabase) {
 
         suspend fun getItems(): List<ShopBagItem> = dao.getAll()
 
+        fun getItemsFlow(): Flow<List<ShopBagItem>> = dao.getAllFlow()
+
         suspend fun setItems(list: List<ShopBagItem>) = dao.insertAll(list)
 
         suspend fun addItem(item: ShopBagItem) {
@@ -94,6 +97,8 @@ class RoomDatabase(private val database: AppDatabase) {
 
         suspend fun getItems(): List<ShopOrder> = dao.getAll()
 
+        fun getItemsFlow(): Flow<List<ShopOrder>> = dao.getAllFlow()
+
         suspend fun insert(order: ShopOrder) = dao.insert(order)
 
         suspend fun nuke() = dao.nukeAll()
@@ -125,6 +130,8 @@ class RoomDatabase(private val database: AppDatabase) {
         private val dao: ShopUserDao = database.userDao()
 
         suspend fun getUsers(): List<ShopUser> = dao.getAll()
+
+        fun getUsersFlow(): Flow<List<ShopUser>> = dao.getAllFlow()
 
         suspend fun getSingle(): ShopUser? = dao.loadSingle()
 

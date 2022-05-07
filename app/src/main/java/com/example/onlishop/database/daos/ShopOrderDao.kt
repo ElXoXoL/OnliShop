@@ -4,9 +4,13 @@ import androidx.room.*
 import com.example.onlishop.database.models.ShopItem
 import com.example.onlishop.database.models.ShopOrder
 import com.example.onlishop.database.models.ShopUser
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ShopOrderDao {
+
+    @Query("SELECT * FROM shoporder")
+    fun getAllFlow(): Flow<List<ShopOrder>>
 
     @Query("SELECT * FROM shoporder")
     suspend fun getAll(): List<ShopOrder>

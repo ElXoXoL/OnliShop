@@ -19,16 +19,17 @@ import com.example.onlishop.models.Size
 import kotlin.random.Random
 
 class SizesAdapter(
-    private val onClick: (position: Int) -> Unit
+    private val onClick: (item: Size) -> Unit
 ): BaseAdapter<Size>(Diff()) {
 
-    class Diff: DiffUtil.ItemCallback<Size>(){
+    class Diff : DiffUtil.ItemCallback<Size>() {
+
         override fun areItemsTheSame(before: Size, new: Size): Boolean {
-            return before.isSelected == new.isSelected
+            return before.size == new.size
         }
 
         override fun areContentsTheSame(before: Size, new: Size): Boolean {
-            return before.isSelected == new.isSelected
+            return before.isSelected == new.isSelected && before.size == new.size
         }
 
     }
@@ -37,15 +38,16 @@ class SizesAdapter(
         return SizeViewHolder(ItemSizeBinding.inflate(parent.inflater, parent, false))
     }
 
-    inner class SizeViewHolder(private val binding: ItemSizeBinding): BaseViewHolder<Size>(binding){
+    private inner class SizeViewHolder(private val binding: ItemSizeBinding) :
+        BaseViewHolder<Size>(binding) {
 
         init {
             binding.root.setOnClickListener {
-                onClick.invoke(bindingAdapterPosition)
+                onClick.invoke(getItem(bindingAdapterPosition))
             }
         }
 
-        override fun bind(item: Size){
+        override fun bind(item: Size) {
             binding.size.text = item.size
             binding.container.isSelected = item.isSelected
         }

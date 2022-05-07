@@ -1,38 +1,56 @@
 package com.example.onlishop.ui.shop
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.*
 import com.example.onlishop.base.BaseViewModel
 import com.example.onlishop.global.Logger
 import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
 import com.example.onlishop.repository.ItemRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 
 class ShopViewModel(private val repository: ItemRepository, private val logger: Logger): BaseViewModel() {
 
-    private val _groups = MutableLiveData<List<Group>>()
-    val groups: LiveData<List<Group>> = _groups
-
-    var selectedGroupId: Int? = null
     val selectedGroup = MutableLiveData<Group>()
+    private val groupIdTrigger = MutableLiveData<Int>()
 
-    private val _items = MutableLiveData<List<Item>>()
-    val items: LiveData<List<Item>> = _items
+    val groups: LiveData<List<Group>> = groupIdTrigger.switchMap { id ->
+        logger.logExecution("loadItemsForGroup ${id}")
+
+        liveData(mainDispatcherHandled) {
+            withContext(Dispatchers.IO) {
+                val groups = repository.getGroups(id)
+                groups.forEach {
+                    if (it.id == id) {
+                        selectedGroup.postValue(it)
+                        it.isSelected = true
+                    }
+                }
+                emit(groups)
+            }
+        }
+    }
+
+    val items: LiveData<List<Item>> = groupIdTrigger.switchMap { id ->
+        logger.logExecution("loadGroupsForGroup ${id}")
+
+        liveData(mainDispatcherHandled) {
+            withContext(Dispatchers.IO) {
+                emit(repository.getItemsForGroup(id))
+            }
+        }
+    }
+
+    val bagCount: LiveData<Int> = repository.getBagSizeFlow()
+        .flowOn(Dispatchers.IO)
+        .asLiveData(mainDispatcherHandled)
 
     init {
         loadData()
     }
 
-    val bagCount = MutableLiveData<Int>()
-    fun loadBagCount(){
-        logger.logExecution("loadBagCount")
-        viewModelScope.launchIo {
-            bagCount.postValue(repository.getBagSize())
-        }
-    }
-
-    private fun loadData(){
+    private fun loadData() {
         logger.logExecution("loadData")
         viewModelScope.launchIo {
             val groups = repository.getGroups()
@@ -41,40 +59,10 @@ class ShopViewModel(private val repository: ItemRepository, private val logger: 
         }
     }
 
-    fun selectGroup(groupId: Int){
-        if (selectedGroupId == groupId) return
-        logger.logExecution("selectGroup $groupId")
-        loadItemsForGroup(groupId)
-        loadGroupsForGroup(groupId)
-    }
-
-    fun setSelected(){
-        val groupId = selectedGroupId ?: return
-        _groups.value?.forEach {
-            it.isSelected = false
-        }
-        val group = _groups.value?.find { it.id == groupId }
-        group?.let {
-            it.isSelected = true
-            selectedGroup.postValue(it)
-        }
-    }
-
-    private fun loadItemsForGroup(groupId: Int) {
-        logger.logExecution("loadItemsForGroup $groupId")
-        viewModelScope.launchIo {
-            val items = repository.getItemsForGroup(groupId)
-            _items.postValue(items)
-        }
-    }
-
-    private fun loadGroupsForGroup(groupId: Int) {
-        logger.logExecution("loadGroupsForGroup $groupId")
-        viewModelScope.launchIo {
-            val groups = repository.getGroups(groupId)
-            selectedGroupId = groupId
-            _groups.postValue(groups)
-        }
+    fun selectGroup(groupId: Int) {
+        if (groupIdTrigger.value == groupId) return
+        groupIdTrigger.postValue(groupId)
+        logger.logExecution("selectGroup ${groupId}")
     }
 
 }

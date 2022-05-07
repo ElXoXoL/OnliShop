@@ -1,18 +1,23 @@
 package com.example.onlishop.repository
 
 import com.example.onlishop.models.*
+import kotlinx.coroutines.flow.Flow
 
 interface OrderRepository {
+
+    fun getOrdersFlow(): Flow<List<Order>>
 
     suspend fun getOrders(): List<Order>
 
     suspend fun getLastOrder(): Order?
 
-    suspend fun addOrder(order: Order): Boolean
+    suspend fun addOrder(order: Order)
 
-    suspend fun addUser(user: User): Boolean
+    suspend fun addUser(user: User)
 
     suspend fun getUser(): User?
 
-    suspend fun removeUser(): Boolean
+    fun getUserFlow(): Flow<User?>
+
+    suspend fun removeUser()
 }

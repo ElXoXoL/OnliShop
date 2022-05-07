@@ -37,7 +37,7 @@ val appModule = module {
     }
 
     single { Logger() }
-    single { Crypt("someKey", "abcdefgh")}
+    single { Crypt("someKey", "abcdefgh") }
 
     single {
         Room.databaseBuilder(
@@ -53,8 +53,8 @@ val appModule = module {
     single { PreferenceRepository(get()) }
     single<GroupsService> { GroupsServiceImpl() }
     single<ItemsService> { ItemsServiceImpl() }
-    single<ItemRepository> { ItemRepositoryImpl(get(), get(), get(), get(), get(named("ExternalScope"))) }
-    single<OrderRepository> { OrderRepositoryImpl(get(), get(), get(), get(named("ExternalOrderScope"))) }
+    single<ItemRepository> { ItemRepositoryImpl(get(), get(), get(), get()) }
+    single<OrderRepository> { OrderRepositoryImpl(get(), get(), get()) }
 
 
     viewModel { ShopViewModel(get(), get()) }
@@ -64,8 +64,8 @@ val appModule = module {
     viewModel { UserViewModel(get(), get()) }
 
 
-    viewModel {
-            (itemId: Int) -> DetailsViewModel(get(), get(), itemId)
+    viewModel { (itemId: Int) ->
+        DetailsViewModel(get(), get(), itemId)
     }
 
 }

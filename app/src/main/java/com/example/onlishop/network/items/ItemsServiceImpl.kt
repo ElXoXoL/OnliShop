@@ -7,6 +7,10 @@ import com.example.onlishop.database.models.ShopItem
 class ItemsServiceImpl: ItemsService {
 
     override fun getItems(): List<ShopItem> {
+        return getMockList()
+    }
+
+    private fun getMockList(): List<ShopItem> {
         return listOf(
             ShopItem(
                 id = 1,

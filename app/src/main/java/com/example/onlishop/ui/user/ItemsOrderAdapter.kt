@@ -18,11 +18,11 @@ class ItemsOrderAdapter : BaseAdapter<OrderItem>(Diff()) {
 
     class Diff: DiffUtil.ItemCallback<OrderItem>(){
         override fun areItemsTheSame(p0: OrderItem, p1: OrderItem): Boolean {
-            return p0 == p1
+            return p0.orderItemId == p1.orderItemId
         }
 
         override fun areContentsTheSame(p0: OrderItem, p1: OrderItem): Boolean {
-            return p0.count == p1.count
+            return p0 == p1
         }
 
     }
@@ -32,7 +32,7 @@ class ItemsOrderAdapter : BaseAdapter<OrderItem>(Diff()) {
         return ItemViewHolder(ItemItemOrderBinding.inflate(parent.inflater, parent, false))
     }
 
-    inner class ItemViewHolder(private val binding: ItemItemOrderBinding): BaseViewHolder<OrderItem>(binding){
+    private inner class ItemViewHolder(private val binding: ItemItemOrderBinding): BaseViewHolder<OrderItem>(binding){
 
         override fun bind(item: OrderItem){
             binding.itemImage.load(item.item.imageDrawable)

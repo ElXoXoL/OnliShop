@@ -48,14 +48,6 @@ class FragmentBag: BaseFragment(R.layout.fragment_bag) {
             } else {
                 itemsAdapter.submitList(it)
             }
-            viewModel.countFullPrice()
-        }
-
-        viewModel.changedPos.observe(viewLifecycleOwner){
-            if (it > -1){
-                itemsAdapter.notifyItemChanged(it)
-            }
-            viewModel.countFullPrice()
         }
 
         viewModel.fullPrice.observe(viewLifecycleOwner){

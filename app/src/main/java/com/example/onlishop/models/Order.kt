@@ -7,7 +7,7 @@ import com.example.onlishop.database.models.ShopItem
 import com.example.onlishop.database.models.ShopOrder
 import com.example.onlishop.utils.Crypt
 
-class Order(
+data class Order(
     val id: String = "",
     val userId: String = "",
     val name: String = "",

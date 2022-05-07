@@ -21,11 +21,11 @@ class ItemsAdapter(
 
     class Diff: DiffUtil.ItemCallback<Item>(){
         override fun areItemsTheSame(p0: Item, p1: Item): Boolean {
-            return p0 == p1
+            return p0.id == p1.id
         }
 
         override fun areContentsTheSame(p0: Item, p1: Item): Boolean {
-            return p0.id == p1.id
+            return p0.name == p1.name
         }
     }
 
@@ -33,7 +33,7 @@ class ItemsAdapter(
         return ItemViewHolder(ItemItemBinding.inflate(parent.inflater, parent, false))
     }
 
-    inner class ItemViewHolder(private val binding: ItemItemBinding): BaseViewHolder<Item>(binding){
+    private inner class ItemViewHolder(private val binding: ItemItemBinding): BaseViewHolder<Item>(binding){
 
         init {
             binding.root.setOnClickListener {

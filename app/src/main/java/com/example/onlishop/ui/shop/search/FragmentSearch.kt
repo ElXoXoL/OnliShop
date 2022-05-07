@@ -20,6 +20,7 @@ import com.example.onlishop.models.Item
 import com.example.onlishop.ui.shop.FragmentShopDirections
 import com.example.onlishop.ui.shop.ItemsAdapter
 import com.example.onlishop.ui.splash.FragmentSplashDirections
+import com.example.onlishop.utils.DefaultAndTranslateAnimator
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
@@ -51,7 +52,6 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-        viewModel.loadBagCount()
     }
 
     private fun setupView(){
@@ -65,6 +65,7 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
 
         binding.dividerItems.dividerTitle.text = getString(R.string.text_items_title)
 
+        binding.recItems.itemAnimator = DefaultAndTranslateAnimator(0.2f, true)
         binding.recItems.adapter = itemsAdapter
 
         itemsAdapter.registerAdapterDataObserver(SimpleAdapterDataObserver{
@@ -88,7 +89,8 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
     private fun onItemClick(item: Item) {
 //        binding.editSearch.hideKeyboard()
         logger.logExecution("onItemClick")
-        val action = FragmentSearchDirections.toDetail(itemId = item.id)
+        val action = FragmentSearchDirections.toDetail()
+        action.itemId = item.id
         findNavController().navigate(action)
     }
 

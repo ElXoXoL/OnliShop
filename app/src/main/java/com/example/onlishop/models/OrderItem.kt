@@ -5,7 +5,7 @@ import com.example.onlishop.database.models.ShopItem
 import com.example.onlishop.database.models.ShopOrder
 import com.example.onlishop.database.models.ShopOrderItem
 
-class OrderItem(
+data class OrderItem(
     val orderItemId: Int,
     val item: Item,
     val size: String,

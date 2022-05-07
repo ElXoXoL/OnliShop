@@ -20,11 +20,11 @@ class OrdersAdapter: BaseAdapter<Order>(Diff()) {
 
     class Diff: DiffUtil.ItemCallback<Order>(){
         override fun areItemsTheSame(p0: Order, p1: Order): Boolean {
-            return p0 == p1
+            return p0.id == p1.id
         }
 
         override fun areContentsTheSame(p0: Order, p1: Order): Boolean {
-            return p0.id == p1.id
+            return p0 == p1
         }
     }
 
@@ -32,7 +32,7 @@ class OrdersAdapter: BaseAdapter<Order>(Diff()) {
         return ItemViewHolder(ItemOrderBinding.inflate(parent.inflater, parent, false))
     }
 
-    inner class ItemViewHolder(private val binding: ItemOrderBinding): BaseViewHolder<Order>(binding){
+    private inner class ItemViewHolder(private val binding: ItemOrderBinding): BaseViewHolder<Order>(binding){
 
         override fun bind(item: Order){
             val context = binding.root.context

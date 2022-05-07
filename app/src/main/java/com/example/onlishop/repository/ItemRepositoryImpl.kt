@@ -11,129 +11,105 @@ import com.example.onlishop.models.Item
 import com.example.onlishop.network.groups.GroupsService
 import com.example.onlishop.network.items.ItemsService
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class ItemRepositoryImpl(
     private val logger: Logger,
     private val itemsService: ItemsService,
     private val groupsService: GroupsService,
     private val room: RoomDatabase,
-    private val externalScope: CoroutineScope,
-    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
     ): ItemRepository {
 
-    private val ignoreHandler = CoroutineExceptionHandler { coroutineContext, throwable ->
-        logger.exception(throwable, this::class)
-    }
-
     override suspend fun getGroups(): List<Group> {
-        return externalScope.async(dispatcher + ignoreHandler) {
+        val groupsResponse = loadGroups()
 
-            val groupsResponse = loadGroups()
+        val resultList = groupsResponse.map { Group.from(it) }
 
-            val resultList = groupsResponse.map { Group.from(it) }
-
-            resultList.sortedBy { it.id }
-        }.await()
+        return resultList.sortedBy { it.id }
     }
 
     override suspend fun getGroups(groupId: Int): List<Group> {
-        return externalScope.async(dispatcher + ignoreHandler) {
+        val groupsResponse = loadGroups()
 
-            val groupsResponse = loadGroups()
+        val resultList = getGroupSiblingAndParent(groupId, groupsResponse).map { Group.from(it) }
 
-            val resultList = getGroupSiblingAndParent(groupId, groupsResponse).map { Group.from(it) }
-
-            resultList.sortedBy { it.id }
-        }.await()
+        return resultList.sortedBy { it.id }
     }
 
     override suspend fun getItems(): List<Item> {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            val itemsResponse = loadItems()
+        val itemsResponse = loadItems()
 
-            val resultList = itemsResponse.map { Item.from(it) }
+        val resultList = itemsResponse.map { Item.from(it) }
 
-            resultList.sortedBy { it.id }
-        }.await()
+        return resultList.sortedBy { it.id }
     }
 
     override suspend fun getItemsForGroup(groupId: Int): List<Item> {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            val items = loadItems()
-            val groups = loadGroups()
-            val parents = getGroupSiblingIds(groupId, groups)
+        val items = loadItems()
+        val groups = loadGroups()
+        val parents = getGroupSiblingIds(groupId, groups)
 
-            val resultList = mutableListOf<Item>()
-            parents.forEach { groupId ->
-                resultList.addAll(
-                    room.shopItems.getItems(groupId).map { Item.from(it) }
-                )
-            }
+        val resultList = mutableListOf<Item>()
+        parents.forEach { groupId ->
+            resultList.addAll(
+                room.shopItems.getItems(groupId).map { Item.from(it) }
+            )
+        }
 
-            resultList.sortedBy { it.id }
-        }.await()
+        return resultList.sortedBy { it.id }
     }
 
     override suspend fun getItem(itemId: Int): Item {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            val item = room.shopItems.getItem(itemId)
-                ?: itemsService.getItems().find { it.id == itemId }
-                ?: throw Exception("Can't find item")
+        val item = room.shopItems.getItem(itemId)
+            ?: itemsService.getItems().find { it.id == itemId }
+            ?: throw Exception("Can't find item")
 
-            Item.from(item)
-        }.await()
+        return Item.from(item)
     }
 
     override suspend fun getSearchItems(search: String): List<Item> {
-        return externalScope.async(dispatcher + ignoreHandler) {
+        val searchLower = search.lowercase()
+        val allItems = room.shopItems.getItems()
+        val allGroups = room.shopGroups.getItems()
+        val resultList = mutableListOf<ShopItem>()
 
-            val searchLower = search.lowercase()
-            val allItems = room.shopItems.getItems()
-            val allGroups = room.shopGroups.getItems()
-            val resultList = mutableListOf<ShopItem>()
-
-            allItems.forEach { item ->
-                when {
-                    item.name.lowercase().contains(searchLower) -> resultList.add(item)
-                    item.description.lowercase().contains(searchLower) -> resultList.add(item)
-                    item.sizes.lowercase().contains(searchLower) -> resultList.add(item)
-                }
-                val groupsBySearch = allGroups.filter { it.name.lowercase().contains(searchLower) }
-                val isGroupFounded = groupsBySearch.firstOrNull { it.id == item.groupId } != null
-                if (isGroupFounded){
-                    resultList.add(item)
-                }
+        allItems.forEach { item ->
+            when {
+                item.name.lowercase().contains(searchLower) -> resultList.add(item)
+                item.description.lowercase().contains(searchLower) -> resultList.add(item)
+                item.sizes.lowercase().contains(searchLower) -> resultList.add(item)
             }
+            val groupsBySearch = allGroups.filter { it.name.lowercase().contains(searchLower) }
+            val isGroupFounded = groupsBySearch.firstOrNull { it.id == item.groupId } != null
+            if (isGroupFounded){
+                resultList.add(item)
+            }
+        }
 
-            val setOfItems = resultList.toSet()
+        val setOfItems = resultList.toSet()
 
-            setOfItems.toList().map { Item.from(it) }.sortedBy { it.id }
-        }.await()
+        return setOfItems.toList().map { Item.from(it) }.sortedBy { it.id }
     }
 
-    override suspend fun addBagItem(item: Item, size: String): Boolean {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            room.shopBag.addItem(
-                ShopBagItem(item.id, size)
-            )
-            true
-        }.await()
+    override suspend fun addBagItem(item: Item, size: String) {
+        room.shopBag.addItem(
+            ShopBagItem(item.id, size)
+        )
     }
 
     override suspend fun removeBagItem(bagItemId: Int) {
-        externalScope.launch(dispatcher + ignoreHandler) {
-            room.shopBag.removeItem(bagItemId)
-        }
+        room.shopBag.removeItem(bagItemId)
     }
 
-    override suspend fun getBagItems(): List<BagItem> {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            val bagItems = room.shopBag.getItems()
+    override fun getBagItemsFlow(): Flow<List<BagItem>> {
+        return room.shopBag.getItemsFlow().map { bagItems ->
             val resultList = mutableListOf<BagItem>()
 
             bagItems.forEach { bagItem ->
                 room.shopItems.getItem(bagItem.id)?.let { shopItem ->
                     val item = Item.from(shopItem)
+
                     resultList.add(
                         BagItem(
                             bagItem.bagItemId,
@@ -146,23 +122,36 @@ class ItemRepositoryImpl(
             }
 
             resultList
-        }.await()
-    }
-
-    override suspend fun cleanBag() {
-        externalScope.launch(dispatcher + ignoreHandler) {
-            room.shopBag.nuke()
         }
     }
 
-    override suspend fun getBagSize(): Int {
-        return externalScope.async(dispatcher + ignoreHandler) {
-            var size = 0
-            room.shopBag.getItems().forEach {
-                size += it.count
+    override suspend fun getBagItems(): List<BagItem> {
+        val bagItems = room.shopBag.getItems()
+        val resultList = mutableListOf<BagItem>()
+
+        bagItems.forEach { bagItem ->
+            room.shopItems.getItem(bagItem.id)?.let { shopItem ->
+                val item = Item.from(shopItem)
+                resultList.add(
+                    BagItem(
+                        bagItem.bagItemId,
+                        item,
+                        bagItem.size,
+                        bagItem.count
+                    )
+                )
             }
-            size
-        }.await()
+        }
+
+        return resultList
+    }
+
+    override suspend fun cleanBag() {
+        room.shopBag.nuke()
+    }
+
+    override fun getBagSizeFlow(): Flow<Int> {
+        return room.shopBag.getItemsFlow().map { it.sumOf { it.count } }
     }
 
     private fun getGroupSiblingIds(groupId: Int, groups: List<ShopGroup>): List<Int>{

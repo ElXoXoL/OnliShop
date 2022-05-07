@@ -23,7 +23,7 @@ class FragmentSplash: BaseFragment(R.layout.fragment_splash) {
         }, 1000)
     }
 
-    private fun openNextFragment(){
+    private fun openNextFragment() {
         logger.logExecution("openNextFragment")
         val action = FragmentSplashDirections.toShop()
         findNavController().navigate(action)

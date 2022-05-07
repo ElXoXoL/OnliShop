@@ -22,11 +22,11 @@ class GroupAdapter(
 
     class Diff: DiffUtil.ItemCallback<Group>(){
         override fun areItemsTheSame(p0: Group, p1: Group): Boolean {
-            return p0 == p1
+            return p0.id == p1.id
         }
 
         override fun areContentsTheSame(p0: Group, p1: Group): Boolean {
-            return p0.isSelected == p1.isSelected
+            return p0 == p1
         }
 
     }
@@ -35,7 +35,7 @@ class GroupAdapter(
         return ItemViewHolder(ItemGroupBinding.inflate(parent.inflater, parent, false))
     }
 
-    inner class ItemViewHolder(private val binding: ItemGroupBinding): BaseViewHolder<Group>(binding){
+    private inner class ItemViewHolder(private val binding: ItemGroupBinding): BaseViewHolder<Group>(binding){
 
         init {
             binding.root.setOnClickListener {

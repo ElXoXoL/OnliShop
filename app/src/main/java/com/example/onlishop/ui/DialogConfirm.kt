@@ -26,7 +26,7 @@ class DialogConfirm(
     private val binding = FragmentDialogConfirmBinding.inflate(LayoutInflater.from(context))
 
     init {
-        if (textTitle.isEmpty() || textSubtitle.isEmpty()){
+        if (textTitle.isEmpty() || textSubtitle.isEmpty()) {
             throw Exception("Texts can't be empty")
         }
     }

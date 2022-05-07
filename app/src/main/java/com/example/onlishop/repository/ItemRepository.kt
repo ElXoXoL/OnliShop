@@ -3,6 +3,7 @@ package com.example.onlishop.repository
 import com.example.onlishop.models.BagItem
 import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
+import kotlinx.coroutines.flow.Flow
 
 interface ItemRepository {
 
@@ -18,13 +19,15 @@ interface ItemRepository {
 
     suspend fun getSearchItems(search: String): List<Item>
 
-    suspend fun addBagItem(item: Item, size: String): Boolean
+    suspend fun addBagItem(item: Item, size: String)
 
     suspend fun removeBagItem(bagItemId: Int)
 
-    suspend fun getBagSize(): Int
+    fun getBagSizeFlow(): Flow<Int>
 
     suspend fun getBagItems(): List<BagItem>
+
+    fun getBagItemsFlow(): Flow<List<BagItem>>
 
     suspend fun cleanBag()
 

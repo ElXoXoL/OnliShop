@@ -60,7 +60,7 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
         showScreen(false)
     }
 
-    private fun setupView(){
+    private fun setupView() {
         binding.btnBack.setOnClickListener(this)
         binding.btnInfo.setOnClickListener(this)
         binding.btnPhone.setOnClickListener(this)
@@ -70,13 +70,13 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
 
         binding.recItems.adapter = ordersAdapter
 
-        ordersAdapter.registerAdapterDataObserver(SimpleAdapterDataObserver{
+        ordersAdapter.registerAdapterDataObserver(SimpleAdapterDataObserver {
             isEmptyItems = ordersAdapter.itemCount == 0
         })
         isEmptyItems = ordersAdapter.itemCount == 0
     }
 
-    private fun setupUserRegView(){
+    private fun setupUserRegView() {
         binding.btnUserLogin.setOnClickListener(this)
         binding.btnRegister.setOnClickListener(this)
         binding.btnDelete.setOnClickListener(this)
@@ -104,13 +104,13 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
         binding.containerUserData.visibility = View.GONE
     }
 
-    private fun observeViewModel(){
+    private fun observeViewModel() {
 
-        viewModel.items.observe(viewLifecycleOwner){
+        viewModel.items.observe(viewLifecycleOwner) {
             ordersAdapter.submitList(it)
         }
 
-        viewModel.user.observe(viewLifecycleOwner){
+        viewModel.user.observe(viewLifecycleOwner) {
 
             if (it == null) {
                 binding.btnUserLogin.visibility = View.VISIBLE
@@ -124,6 +124,7 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
             binding.tvUserName.text = getString(R.string.text_user_name, it.name)
             binding.tvUserPhone.text = getString(R.string.text_user_phone, it.phone.formattedPhone)
             binding.tvUserEmail.text = getString(R.string.text_user_email, it.email)
+
         }
 
     }
@@ -166,7 +167,7 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
     }
 
     override fun onBackPressed() {
-        if (binding.userRegContainer.visibility == View.VISIBLE){
+        if (binding.userRegContainer.visibility == View.VISIBLE) {
             showScreen(false)
             return
         }
@@ -174,7 +175,7 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
     }
 
     override fun onClick(v: View?) {
-        when (v?.id){
+        when (v?.id) {
             binding.btnBack.id -> {
                 onBackPressed()
             }
@@ -198,13 +199,13 @@ class FragmentUser: BaseFragment(R.layout.fragment_user) {
             }
             binding.btnDelete.id -> {
                 DialogConfirm(
-                    requireContext(),
-                    "Deleting your user",
-                    "Deleting will erase all your data, do you want to continue?",
-                    "No",
-                    "Yes",
-                    true,
-                    false
+                    context = requireContext(),
+                    textTitle = "Deleting your user",
+                    textSubtitle = "Deleting will erase all your data, do you want to continue?",
+                    textNo = "No",
+                    textYes = "Yes",
+                    isCancelable = true,
+                    isYesImportant = false
                 ) {
                     if (it) {
                         viewModel.removeUser()

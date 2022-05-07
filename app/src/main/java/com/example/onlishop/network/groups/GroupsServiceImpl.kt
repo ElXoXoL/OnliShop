@@ -5,6 +5,10 @@ import com.example.onlishop.database.models.ShopGroup
 class GroupsServiceImpl: GroupsService {
 
     override fun getGroups(): List<ShopGroup> {
+        return getMockList()
+    }
+
+    private fun getMockList(): List<ShopGroup> {
         return listOf(
             ShopGroup(
                 id = 0,

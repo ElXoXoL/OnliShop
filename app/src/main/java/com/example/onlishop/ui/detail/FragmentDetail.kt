@@ -54,8 +54,6 @@ class FragmentDetail: BaseFragment(R.layout.fragment_item_detail) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
         observeViewModel()
-
-        viewModel.loadBagCount()
     }
 
     private fun setupView(){
@@ -84,14 +82,8 @@ class FragmentDetail: BaseFragment(R.layout.fragment_item_detail) {
         }
 
         viewModel.sizes.observe(viewLifecycleOwner){ list ->
-            if (list.isNotEmpty()){
-                if (list.all { !it.isSelected }){
-                    viewModel.selectSize(0)
-                } else {
-                    sizesAdapter.submitList(list)
-                    sizesAdapter.notifyDataSetChanged()
-                }
-            }
+            logger.logExecution("SUBMIT")
+            sizesAdapter.submitList(list)
         }
 
     }
