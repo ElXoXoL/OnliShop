@@ -7,7 +7,7 @@ import com.example.onlishop.database.models.ShopItem
 interface ShopItemDao {
 
     @Query("SELECT * FROM shopitem")
-    suspend fun getAll(): List<ShopItem>
+    fun getAll(): List<ShopItem>
 
     @Query("SELECT * FROM shopitem WHERE id=:id")
     fun loadSingle(id: Int): ShopItem?
@@ -25,21 +25,21 @@ interface ShopItemDao {
     fun loadForSearchSizes(search: String): List<ShopItem>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: ShopItem)
+    fun insert(item: ShopItem)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(list: List<ShopItem>)
+    fun insertAll(list: List<ShopItem>)
 
     @Query("SELECT COUNT(id) FROM shopitem")
     fun getItemsCount(): Int
 
     @Delete
-    suspend fun delete(item: ShopItem)
+    fun delete(item: ShopItem)
 
     @Update
-    suspend fun update(item: ShopItem)
+    fun update(item: ShopItem)
 
     @Query("DELETE FROM shopitem")
-    suspend fun nukeAll()
+    fun nukeAll()
 
 }

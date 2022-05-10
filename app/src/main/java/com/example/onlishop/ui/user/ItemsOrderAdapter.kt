@@ -18,7 +18,7 @@ class ItemsOrderAdapter : BaseAdapter<OrderItem>(Diff()) {
 
     class Diff: DiffUtil.ItemCallback<OrderItem>(){
         override fun areItemsTheSame(p0: OrderItem, p1: OrderItem): Boolean {
-            return p0.orderItemId == p1.orderItemId
+            return p0.item == p1.item && p0.size == p1.size
         }
 
         override fun areContentsTheSame(p0: OrderItem, p1: OrderItem): Boolean {

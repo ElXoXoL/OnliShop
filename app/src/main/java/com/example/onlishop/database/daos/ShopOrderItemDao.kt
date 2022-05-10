@@ -8,21 +8,21 @@ import com.example.onlishop.database.models.ShopOrderItem
 interface ShopOrderItemDao {
 
     @Query("SELECT * FROM shoporderitem")
-    suspend fun getAll(): List<ShopOrderItem>
+    fun getAll(): List<ShopOrderItem>
 
     @Query("SELECT * FROM shoporderitem WHERE orderId=:orderId")
     fun loadForOrder(orderId: String): List<ShopOrderItem>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: ShopOrderItem)
+    fun insert(item: ShopOrderItem)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(list: List<ShopOrderItem>)
+    fun insertAll(list: List<ShopOrderItem>)
 
     @Query("SELECT COUNT(id) FROM shoporderitem")
     fun getItemsCount(): Int
 
     @Query("DELETE FROM shoporderitem")
-    suspend fun nukeAll()
+    fun nukeAll()
 
 }

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 interface ShopUserDao {
 
     @Query("SELECT * FROM shopuser")
-    suspend fun getAll(): List<ShopUser>
+    fun getAll(): List<ShopUser>
 
     @Query("SELECT * FROM shopuser")
     fun getAllFlow(): Flow<List<ShopUser>>
@@ -18,12 +18,12 @@ interface ShopUserDao {
     fun loadSingle(): ShopUser?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: ShopUser)
+    fun insert(item: ShopUser)
 
     @Delete
-    suspend fun delete(item: ShopUser)
+    fun delete(item: ShopUser)
 
     @Query("DELETE FROM shopuser")
-    suspend fun nukeAll()
+    fun nukeAll()
 
 }

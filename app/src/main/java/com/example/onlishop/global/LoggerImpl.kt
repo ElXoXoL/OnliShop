@@ -10,7 +10,7 @@ enum class LogType {
     Error
 }
 
-class Logger {
+class LoggerImpl: Logger {
 
     private val isLogsEnabled = true
 
@@ -21,31 +21,49 @@ class Logger {
         if (isLogsEnabled) Log.d(logTag, obj.toString())
     }
 
-    fun logExecution(obj: Any?){
+    override fun logExecution(obj: Any?){
         log(obj, LogType.FuncCall.name.appSigned)
     }
 
-    fun logApi(obj: Any?){
+    override fun logApi(obj: Any?){
         log(obj, LogType.ApiCall.name.appSigned)
     }
 
-    fun logDev(obj: Any?){
+    override fun logDev(obj: Any?){
         log(obj, LogType.Default.name.appSigned)
     }
 
-    fun logDevWithThread(obj: Any?){
+    override fun logDevWithThread(obj: Any?){
         log("$obj thread ${Thread.currentThread().name}", LogType.Default.name.appSigned)
     }
 
-    fun logTag(obj: Any?, logTag: String){
+    override fun logTag(obj: Any?, logTag: String){
         log(obj, logTag.appSigned)
     }
 
-    fun <T: Any> exception(obj: Any?, clazz: KClass<T>){
+    override fun <T: Any> exception(obj: Any?, clazz: KClass<T>){
         if (isLogsEnabled) Log.e(clazz::class.java.name.appSigned, obj.toString())
     }
 
-    fun <T: Any> logTagClass(obj: Any?, clazz: KClass<T>){
+    override fun <T: Any> logTagClass(obj: Any?, clazz: KClass<T>){
         if (isLogsEnabled) Log.d(clazz::class.java.name.appSigned, obj.toString())
     }
+}
+
+interface Logger {
+
+    fun logExecution(obj: Any?)
+
+    fun logApi(obj: Any?)
+
+    fun logDev(obj: Any?)
+
+    fun logDevWithThread(obj: Any?)
+
+    fun logTag(obj: Any?, logTag: String)
+
+    fun <T: Any> exception(obj: Any?, clazz: KClass<T>)
+
+    fun <T: Any> logTagClass(obj: Any?, clazz: KClass<T>)
+
 }

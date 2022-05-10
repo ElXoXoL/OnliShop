@@ -13,15 +13,18 @@ interface ShopOrderDao {
     fun getAllFlow(): Flow<List<ShopOrder>>
 
     @Query("SELECT * FROM shoporder")
-    suspend fun getAll(): List<ShopOrder>
+    fun getAll(): List<ShopOrder>
+
+    @Query("SELECT * FROM shoporder ORDER BY autoId DESC LIMIT 1")
+    fun getLast(): ShopOrder?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: ShopOrder)
+    fun insert(item: ShopOrder)
 
     @Delete
-    suspend fun delete(item: ShopOrder)
+    fun delete(item: ShopOrder)
 
     @Query("DELETE FROM shoporder")
-    suspend fun nukeAll()
+    fun nukeAll()
 
 }

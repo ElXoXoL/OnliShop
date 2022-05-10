@@ -1,13 +1,10 @@
 package com.example.onlishop.ui.user
 
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.onlishop.base.BaseViewModel
 import com.example.onlishop.global.Logger
-import com.example.onlishop.models.Group
-import com.example.onlishop.models.Item
 import com.example.onlishop.models.Order
 import com.example.onlishop.models.User
 import com.example.onlishop.repository.OrderRepository
@@ -22,7 +19,7 @@ class UserViewModel(private val repository: OrderRepository, private val logger:
         .flowOn(Dispatchers.IO)
         .asLiveData(mainDispatcherHandled)
 
-    val user: LiveData<User?> = repository.getUserFlow().flowOn(Dispatchers.IO).asLiveData(mainDispatcherHandled)
+    val user: LiveData<User?> get() = repository.getUserFlow().flowOn(Dispatchers.IO).asLiveData(mainDispatcherHandled)
 
     fun removeUser() {
         logger.logExecution("loadUser")

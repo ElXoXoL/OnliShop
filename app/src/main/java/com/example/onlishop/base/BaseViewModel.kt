@@ -24,11 +24,11 @@ abstract class BaseViewModel: ViewModel() {
     protected val mainDispatcherHandled = Dispatchers.Main + errorHandler
 
     init {
-        App.logger.logExecution("init ${this::class.java.name}")
+//        App.logger.logExecution("init ${this::class.java.name}")
     }
 
     override fun onCleared() {
-        App.logger.logExecution("onCleared ${this::class.java.name}")
+//        App.logger.logExecution("onCleared ${this::class.java.name}")
         super.onCleared()
     }
 

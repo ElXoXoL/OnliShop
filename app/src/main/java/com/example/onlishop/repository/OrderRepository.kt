@@ -7,15 +7,11 @@ interface OrderRepository {
 
     fun getOrdersFlow(): Flow<List<Order>>
 
-    suspend fun getOrders(): List<Order>
-
     suspend fun getLastOrder(): Order?
 
     suspend fun addOrder(order: Order)
 
     suspend fun addUser(user: User)
-
-    suspend fun getUser(): User?
 
     fun getUserFlow(): Flow<User?>
 

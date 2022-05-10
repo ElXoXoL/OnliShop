@@ -20,7 +20,7 @@ class ShopViewModel(private val repository: ItemRepository, private val logger: 
 
         liveData(mainDispatcherHandled) {
             withContext(Dispatchers.IO) {
-                val groups = repository.getGroups(id)
+                val groups = repository.getGroupChildrenAndParent(id)
                 groups.forEach {
                     if (it.id == id) {
                         selectedGroup.postValue(it)
@@ -37,7 +37,7 @@ class ShopViewModel(private val repository: ItemRepository, private val logger: 
 
         liveData(mainDispatcherHandled) {
             withContext(Dispatchers.IO) {
-                emit(repository.getItemsForGroup(id))
+                emit(repository.getItemsAndSubitemsForGroup(id))
             }
         }
     }

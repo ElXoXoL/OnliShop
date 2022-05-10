@@ -9,11 +9,11 @@ interface ItemRepository {
 
     suspend fun getGroups(): List<Group>
 
-    suspend fun getGroups(groupId: Int): List<Group>
+    suspend fun getGroupChildrenAndParent(groupId: Int): List<Group>
 
     suspend fun getItems(): List<Item>
 
-    suspend fun getItemsForGroup(groupId: Int): List<Item>
+    suspend fun getItemsAndSubitemsForGroup(groupId: Int): List<Item>
 
     suspend fun getItem(itemId: Int): Item
 

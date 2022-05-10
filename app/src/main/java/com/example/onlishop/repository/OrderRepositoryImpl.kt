@@ -1,49 +1,55 @@
 package com.example.onlishop.repository
 
-import com.example.onlishop.database.RoomDatabase
+import com.example.onlishop.database.daos.ShopItemDao
+import com.example.onlishop.database.daos.ShopOrderDao
+import com.example.onlishop.database.daos.ShopOrderItemDao
+import com.example.onlishop.database.daos.ShopUserDao
 import com.example.onlishop.database.models.*
 import com.example.onlishop.global.Logger
 import com.example.onlishop.models.*
 import com.example.onlishop.utils.Crypt
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import java.util.*
 
 class OrderRepositoryImpl(
     private val logger: Logger,
-    private val room: RoomDatabase,
+    private val shopOrderDao: ShopOrderDao,
+    private val shopOrderItemDao: ShopOrderItemDao,
+    private val shopUserDao: ShopUserDao,
+    private val shopItemDao: ShopItemDao,
     private val crypt: Crypt,
 ) : OrderRepository {
+
+    //TODO : extract user stuff to user repo
 
     /**
      * Get orders flow, then get items for order one by one, map everything to Order.kt
      * @return list of orders combined with their items
      */
     override fun getOrdersFlow(): Flow<List<Order>> {
-        return room.shopOrder.getItemsFlow().map { orderList ->
-            orderList.map { order ->
-                val orderItems = room.shopOrderItems.getForOrder(order.id).map { orderItem ->
-                    val item = Item.from(room.shopItems.getItem(orderItem.id)!!)
-                    OrderItem(orderItem.orderItemId, item, orderItem.size, orderItem.count)
-                }
-                Order.from(order, orderItems, crypt)
+        return shopOrderDao.getAllFlow().map { orderList ->
+            orderList.map {
+                getOrderWithItems(it)
             }
         }
     }
 
-    override suspend fun getOrders(): List<Order> {
-        val orders = room.shopOrder.getItems()
-        return orders.map { order ->
-            val orderItems = room.shopOrderItems.getForOrder(order.id).map { orderItem ->
-                val item = Item.from(room.shopItems.getItem(orderItem.id)!!)
-                OrderItem(orderItem.orderItemId, item, orderItem.size, orderItem.count)
-            }
-            Order.from(order, orderItems, crypt)
-        }
+    override suspend fun getLastOrder(): Order? {
+        val lastOrder = shopOrderDao.getLast() ?: return null
+        return getOrderWithItems(lastOrder)
     }
 
-    override suspend fun getLastOrder(): Order? = getOrders().lastOrNull()
+    private fun getOrderWithItems(order: ShopOrder): Order {
+        val orderItems = shopOrderItemDao.loadForOrder(order.id).map { orderItem ->
+            val item = Item.from(shopItemDao.loadSingle(orderItem.id)!!)
+            OrderItem(
+                item = item,
+                size = orderItem.size,
+                count = orderItem.count
+            )
+        }
+        return Order.from(order, orderItems, crypt)
+    }
 
     override suspend fun addOrder(order: Order) {
         val shopOrder = ShopOrder(
@@ -66,8 +72,8 @@ class OrderRepositoryImpl(
                 orderId = order.id
             )
         }
-        room.shopOrder.insert(shopOrder)
-        room.shopOrderItems.addItems(orderItems)
+        shopOrderItemDao.insertAll(orderItems)
+        shopOrderDao.insert(shopOrder)
     }
 
     override suspend fun addUser(user: User) {
@@ -78,25 +84,21 @@ class OrderRepositoryImpl(
             email = crypt.encrypt(user.email),
             pass = crypt.encrypt(user.pass),
         )
-        room.shopUsers.insert(shopUser)
-    }
-
-    override suspend fun getUser(): User? {
-        return User.from(room.shopUsers.getSingle(), crypt)
+        shopUserDao.insert(shopUser)
     }
 
     override fun getUserFlow(): Flow<User?> {
-        return room.shopUsers
-            .getUsersFlow()
+        return shopUserDao
+            .getAllFlow()
             .map {
                 User.from(it.firstOrNull(), crypt)
             }
     }
 
     override suspend fun removeUser() {
-        room.shopUsers.nuke()
-        room.shopOrder.nuke()
-        room.shopOrderItems.nuke()
+        shopUserDao.nukeAll()
+        shopOrderDao.nukeAll()
+        shopOrderItemDao.nukeAll()
     }
 
 }

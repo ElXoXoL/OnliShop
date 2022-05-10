@@ -11,7 +11,7 @@ interface ShopBagItemDao {
     fun getAllFlow(): Flow<List<ShopBagItem>>
 
     @Query("SELECT * FROM ShopBagItem")
-    suspend fun getAll(): List<ShopBagItem>
+    fun getAll(): List<ShopBagItem>
 
     @Query("SELECT * FROM ShopBagItem WHERE id=:id AND size=:size")
     fun loadSingle(id: Int, size: String): ShopBagItem?
@@ -20,21 +20,21 @@ interface ShopBagItemDao {
     fun loadSingle(bagItemId: Int): ShopBagItem?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(item: ShopBagItem)
+    fun insert(item: ShopBagItem)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(list: List<ShopBagItem>)
+    fun insertAll(list: List<ShopBagItem>)
 
     @Query("SELECT COUNT(id) FROM ShopBagItem")
     fun getItemsCount(): Int
 
     @Query("DELETE FROM ShopBagItem WHERE bagItemId=:bagItemId")
-    suspend fun delete(bagItemId: Int)
+    fun delete(bagItemId: Int)
 
     @Update
-    suspend fun update(item: ShopBagItem)
+    fun update(item: ShopBagItem)
 
     @Query("DELETE FROM ShopBagItem")
-    suspend fun nukeAll()
+    fun nukeAll()
 
 }

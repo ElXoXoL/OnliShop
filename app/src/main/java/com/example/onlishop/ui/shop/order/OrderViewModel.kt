@@ -1,6 +1,5 @@
 package com.example.onlishop.ui.shop.order
 
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.onlishop.base.BaseViewModel
@@ -53,7 +52,7 @@ class OrderViewModel(
         viewModelScope.launchIo {
             val bagItems = repository.getBagItems()
             val orderItems = bagItems.map {
-                OrderItem(it.bagItemId, it.item, it.size, it.count)
+                OrderItem(it.item, it.size, it.count)
             }
             val order = Order(
                 id = IdGenerator.randomId,

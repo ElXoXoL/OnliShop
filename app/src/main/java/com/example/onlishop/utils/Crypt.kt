@@ -5,14 +5,14 @@ import javax.crypto.Cipher
 import javax.crypto.spec.IvParameterSpec
 import javax.crypto.spec.SecretKeySpec
 
-class Crypt(private val key: String, private val iv: String) {
+class CryptImpl(private val key: String, private val iv: String): Crypt {
 
     companion object {
         private const val ALGORITHM = "Blowfish"
         private const val MODE = "Blowfish/CBC/PKCS5Padding"
     }
 
-    fun encrypt(value: String): String {
+    override fun encrypt(value: String): String {
         return try {
             val secretKeySpec = SecretKeySpec(key.toByteArray(), ALGORITHM)
             val cipher: Cipher = Cipher.getInstance(MODE)
@@ -24,7 +24,7 @@ class Crypt(private val key: String, private val iv: String) {
         }
     }
 
-    fun decrypt(value: String): String {
+    override fun decrypt(value: String): String {
         return try {
             val values: ByteArray = Base64.decode(value, Base64.DEFAULT)
             val secretKeySpec = SecretKeySpec(key.toByteArray(), ALGORITHM)
@@ -36,4 +36,9 @@ class Crypt(private val key: String, private val iv: String) {
         }
     }
 
+}
+
+interface Crypt {
+    fun encrypt(value: String): String
+    fun decrypt(value: String): String
 }

@@ -1,9 +1,5 @@
 package com.example.onlishop.models
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.example.onlishop.base.Model
-import com.example.onlishop.database.models.ShopItem
 import com.example.onlishop.database.models.ShopOrder
 import com.example.onlishop.utils.Crypt
 
@@ -18,8 +14,8 @@ data class Order(
     val cardNum: String = "",
     val cardDate: String = "",
     val date: String = "",
-    val orderItems: List<OrderItem>
-) : Model() {
+    val orderItems: List<OrderItem>,
+) {
     companion object {
         fun from(it: ShopOrder, items: List<OrderItem>, crypt: Crypt): Order = Order(
             id = it.id,

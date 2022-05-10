@@ -11,10 +11,11 @@ import com.example.onlishop.global.inflater
 import com.example.onlishop.global.load
 import com.example.onlishop.global.signed
 import com.example.onlishop.models.BagItem
+import com.example.onlishop.models.Item
 
 class ItemsBagAdapter(
-    private val onMinus: (bagItem: BagItem) -> Unit,
-    private val onPlus: (bagItem: BagItem) -> Unit,
+    private val onMinus: (bagItemId: Int) -> Unit,
+    private val onPlus: (item: Item, size: String) -> Unit,
 ): BaseAdapter<BagItem>(Diff()) {
 
     class Diff: DiffUtil.ItemCallback<BagItem>(){
@@ -37,10 +38,12 @@ class ItemsBagAdapter(
 
         init {
             binding.btnMinus.setOnClickListener{
-                onMinus.invoke(getItem(bindingAdapterPosition))
+                val item = getItem(bindingAdapterPosition)
+                onMinus.invoke(item.bagItemId)
             }
             binding.btnPlus.setOnClickListener{
-                onPlus.invoke(getItem(bindingAdapterPosition))
+                val item = getItem(bindingAdapterPosition)
+                onPlus.invoke(item.item, item.size)
             }
         }
 

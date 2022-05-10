@@ -1,6 +1,5 @@
 package com.example.onlishop.models
 
-import com.example.onlishop.base.Model
 import com.example.onlishop.database.models.ShopGroup
 
 data class Group (
@@ -8,7 +7,7 @@ data class Group (
         val parentGroupId: Int? = null,
         val name: String = "",
         var isSelected: Boolean = false
-): Model() {
+) {
         companion object {
                 fun from(it: ShopGroup): Group = Group(
                         it.id, it.parentGroupId, it.name
