@@ -6,12 +6,12 @@ plugins {
 }
 
 android {
-    compileSdk 31
+    compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.onlishop"
+        applicationId "com.compose.onlishop"
         minSdk 23
-        targetSdk 31
+        targetSdk 33
         versionCode 1
         versionName "1.0"
 
@@ -19,12 +19,13 @@ android {
 
         vectorDrawables.useSupportLibrary = true
 
-        renderscriptTargetApi 21
+        renderscriptTargetApi 23
         renderscriptSupportModeEnabled true
     }
 
     buildFeatures {
         viewBinding true
+        compose true
     }
 
     buildTypes {
@@ -40,38 +41,48 @@ android {
     kotlinOptions {
         jvmTarget = '1.8'
     }
+    composeOptions {
+        kotlinCompilerExtensionVersion "1.3.1"
+    }
 
     testOptions {
         unitTests.includeAndroidResources = true
     }
+    namespace 'com.example.onlishop'
 }
 
 dependencies {
 
-    implementation 'androidx.core:core-ktx:1.7.0'
-    implementation 'androidx.appcompat:appcompat:1.4.1'
-    implementation 'com.google.android.material:material:1.5.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.3'
+    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.appcompat:appcompat:1.6.0'
+    implementation 'com.google.android.material:material:1.7.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     implementation "androidx.multidex:multidex:2.0.1"
     implementation "androidx.cardview:cardview:1.0.0"
     implementation "androidx.recyclerview:recyclerview:1.2.1"
     implementation "androidx.vectordrawable:vectordrawable:1.1.0"
-    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
     //Glide
-    implementation "com.github.bumptech.glide:glide:4.13.0"
-    kapt "com.github.bumptech.glide:compiler:4.13.0"
+    implementation "com.github.bumptech.glide:glide:4.14.2"
+    kapt "com.github.bumptech.glide:compiler:4.14.2"
+    implementation "com.github.bumptech.glide:compose:1.0.0-alpha.1"
     
     implementation 'com.google.android.flexbox:flexbox:3.0.0'
 
-    implementation "com.google.code.gson:gson:2.8.8" // Google Gson
+    implementation "com.google.code.gson:gson:2.9.0" // Google Gson
 
-    api "androidx.lifecycle:lifecycle-runtime-ktx:2.4.1"
-    api "androidx.lifecycle:lifecycle-common-java8:2.4.1"
-    api "androidx.lifecycle:lifecycle-viewmodel-ktx:2.4.1"
-    api "androidx.lifecycle:lifecycle-livedata-ktx:2.4.1"
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1"
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.5.1"
 
-    def room_version = "2.4.2"
+    implementation "androidx.activity:activity-compose:1.6.1"
+    implementation "androidx.compose.runtime:runtime-livedata:1.3.3"
+    implementation "androidx.compose.material:material:1.3.1"
+    implementation "androidx.compose.ui:ui-tooling:1.3.3"
+
+    def room_version = "2.5.0"
 
     implementation "androidx.room:room-runtime:$room_version"
     kapt "androidx.room:room-compiler:$room_version"
@@ -81,8 +92,8 @@ dependencies {
 
 
     //Kotlin Coroutines
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0"
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 
     // Koin
     def koin_version = "2.2.2"
@@ -92,7 +103,7 @@ dependencies {
     implementation "org.koin:koin-android-architecture:0.9.1"
     androidTestImplementation "org.koin:koin-test:$koin_version"
 
-    def nav_version = "2.4.2"
+    def nav_version = "2.5.3"
     // Kotlin
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
@@ -104,11 +115,11 @@ dependencies {
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
     // Jetpack Compose Integration
-    implementation "androidx.navigation:navigation-compose:2.5.0-beta01"
+    implementation "androidx.navigation:navigation-compose:2.6.0-alpha04"
 
 
-    androidTestImplementation 'androidx.test:core-ktx:1.4.0'
-    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.3'
+    androidTestImplementation 'androidx.test:core-ktx:1.5.0'
+    androidTestImplementation 'androidx.test.ext:junit-ktx:1.1.5'
     //For InstantTaskExecutorRule
     androidTestImplementation "androidx.arch.core:core-testing:2.1.0"
 
@@ -119,10 +130,10 @@ dependencies {
     // Optional -- mockito-kotlin
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:4.0.0"
     //For runBlockingTest, CoroutineDispatcher etc.
-    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.0"
+    androidTestImplementation "org.jetbrains.kotlinx:kotlinx-coroutines-test:1.6.4"
 
     // Needed JUnit version
 //    testcompile "org.koin:koin-test-junit4:2.2.2"
-    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
 }

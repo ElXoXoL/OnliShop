@@ -26,7 +26,7 @@
         android:id="@+id/fragmentShop"
         android:name="com.example.onlishop.ui.shop.FragmentShop"
         android:label="FragmentShop"
-        tools:layout="@layout/fragment_shop">
+        tools:layout="@layout/fragment_compose">
                 <action
                     android:id="@+id/toDetail"
                     app:destination="@id/fragmentDetail"
@@ -67,7 +67,7 @@
         android:id="@+id/fragmentSearch"
         android:name="com.example.onlishop.ui.shop.search.FragmentSearch"
         android:label="fragmentSearch"
-        tools:layout="@layout/fragment_search">
+        tools:layout="@layout/fragment_compose">
         <action
             android:id="@+id/toDetail"
             app:destination="@id/fragmentDetail"

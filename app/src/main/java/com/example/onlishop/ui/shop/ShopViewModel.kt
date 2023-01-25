@@ -7,12 +7,17 @@ import com.example.onlishop.models.Group
 import com.example.onlishop.models.Item
 import com.example.onlishop.repository.ItemRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.withContext
 
 class ShopViewModel(private val repository: ItemRepository, private val logger: Logger): BaseViewModel() {
 
-    val selectedGroup = MutableLiveData<Group>()
+    private val _selectedGroupState = MutableStateFlow<Group?>(null)
+    val selectedGroup = _selectedGroupState.asStateFlow()
+
     private val groupIdTrigger = MutableLiveData<Int>()
 
     val groups: LiveData<List<Group>> = groupIdTrigger.switchMap { id ->
@@ -21,10 +26,12 @@ class ShopViewModel(private val repository: ItemRepository, private val logger: 
         liveData(mainDispatcherHandled) {
             withContext(Dispatchers.IO) {
                 val groups = repository.getGroupChildrenAndParent(id)
-                groups.forEach {
-                    if (it.id == id) {
-                        selectedGroup.postValue(it)
-                        it.isSelected = true
+                groups.forEach { group ->
+                    if (group.id == id) {
+                        group.isSelected = true
+                        _selectedGroupState.update {
+                            group
+                        }
                     }
                 }
                 emit(groups)

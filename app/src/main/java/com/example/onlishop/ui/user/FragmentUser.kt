@@ -15,8 +15,6 @@ import androidx.navigation.fragment.findNavController
 import com.example.onlishop.R
 import com.example.onlishop.base.BaseFragment
 import com.example.onlishop.base.SimpleAdapterDataObserver
-import com.example.onlishop.databinding.FragmentSearchBinding
-import com.example.onlishop.databinding.FragmentShopBinding
 import com.example.onlishop.databinding.FragmentUserBinding
 import com.example.onlishop.global.*
 import com.example.onlishop.models.Group
@@ -25,7 +23,6 @@ import com.example.onlishop.models.OrderCheck
 import com.example.onlishop.models.User
 import com.example.onlishop.ui.DialogConfirm
 import com.example.onlishop.ui.shop.FragmentShopDirections
-import com.example.onlishop.ui.shop.ItemsAdapter
 import com.example.onlishop.ui.splash.FragmentSplashDirections
 import com.example.onlishop.utils.IdGenerator
 import com.example.onlishop.utils.LinkOpenHelper

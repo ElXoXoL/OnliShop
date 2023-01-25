@@ -15,6 +15,8 @@ class SearchViewModel(private val repository: ItemRepository, private val logger
 
     private val selectedSearch = MutableStateFlow("")
 
+    val currentSearch = selectedSearch.asStateFlow()
+
     @ExperimentalCoroutinesApi
     @FlowPreview
     val items: LiveData<List<Item>> = selectedSearch

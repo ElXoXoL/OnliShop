@@ -10,10 +10,17 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.*
 import androidx.annotation.*
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.onlishop.app.App
 import com.example.onlishop.app.glide.GlideApp
 import com.google.android.play.core.tasks.Task
 import com.google.android.play.core.tasks.Tasks
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 import kotlin.Exception
 
@@ -38,9 +45,6 @@ fun Context.color(@ColorRes resId: Int): Int{
 fun <T> Task<T>.await(): T{
     return Tasks.await(this, 10, TimeUnit.SECONDS)
 }
-
-val Int.dp: Int
-    get() = (this / Resources.getSystem().displayMetrics.density).toInt()
 
 val Int.px: Int
     get() = (this * Resources.getSystem().displayMetrics.density).toInt()
@@ -160,4 +164,22 @@ fun Int.getAppliedDiscount(itemsCount: Int): Int {
     val discountValue = (this * discount).toInt()
 
     return this - discountValue
+}
+
+fun <T> Fragment.collectLifecycleFlow(flow: Flow<T>, collect: suspend (T) -> Unit) {
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            flow.collect {
+                collect(it)
+            }
+        }
+    }
+}
+
+fun <T> Fragment.collectLatestLifecycleFlow(flow: Flow<T>, collect: suspend (T) -> Unit) {
+    viewLifecycleOwner.lifecycleScope.launch {
+        viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            flow.collectLatest(collect)
+        }
+    }
 }

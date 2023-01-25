@@ -1,87 +1,123 @@
 package com.example.onlishop.ui.shop.search
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
-import android.view.inputmethod.EditorInfo
-import androidx.core.widget.addTextChangedListener
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.TextField
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.fragment.findNavController
 import com.example.onlishop.R
 import com.example.onlishop.base.BaseFragment
-import com.example.onlishop.base.SimpleAdapterDataObserver
-import com.example.onlishop.databinding.FragmentSearchBinding
-import com.example.onlishop.databinding.FragmentShopBinding
 import com.example.onlishop.global.hideKeyboard
-import com.example.onlishop.global.showKeyboard
-import com.example.onlishop.global.viewBinding
-import com.example.onlishop.models.Group
+import com.example.onlishop.models.IconAction
 import com.example.onlishop.models.Item
-import com.example.onlishop.ui.shop.FragmentShopDirections
-import com.example.onlishop.ui.shop.ItemsAdapter
-import com.example.onlishop.ui.splash.FragmentSplashDirections
-import com.example.onlishop.utils.DefaultAndTranslateAnimator
+import com.example.onlishop.ui.composables.ItemsColumn
+import com.example.onlishop.ui.composables.general.LineTextSpacer
+import com.example.onlishop.ui.composables.general.ShopFloating
+import com.example.onlishop.ui.composables.general.ToolBar
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 
-class FragmentSearch: BaseFragment(R.layout.fragment_search) {
+class FragmentSearch: BaseFragment(R.layout.fragment_compose) {
 
-    private val binding by viewBinding(FragmentSearchBinding::bind)
     private val viewModel: SearchViewModel by viewModel()
-
-    private val itemsAdapter by lazy { ItemsAdapter(this::onItemClick) }
-
-    private var isEmptyItems: Boolean = true
-        set(value) {
-            binding.tvEmptyItems.visibility = if (value) View.VISIBLE else View.GONE
-            field = value
-        }
-
-    private var bagCount: Int = 0
-        set(value) {
-            if (value > 0){
-                binding.bag.root.visibility = View.VISIBLE
-                binding.bag.bagSize.text = value.toString()
-            } else {
-                binding.bag.root.visibility = View.GONE
-            }
-            field = value
-        }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setupView()
-        observeViewModel()
-    }
 
-    private fun setupView(){
-        binding.btnBack.setOnClickListener(this)
-        binding.bag.root.setOnClickListener(this)
+        (view as ComposeView).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val itemsState = viewModel.items.observeAsState()
+                val bagCountState = viewModel.bagCount.observeAsState(0)
+                val searchState = viewModel.currentSearch.collectAsState()
 
-//        binding.editSearch.showKeyboard()
-        binding.editSearch.addTextChangedListener(onTextChanged = { text, _, _, _ ->
-            viewModel.setSearch(text?.toString() ?: "")
-        })
 
-        binding.dividerItems.dividerTitle.text = getString(R.string.text_items_title)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Column(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
 
-        binding.recItems.itemAnimator = DefaultAndTranslateAnimator(0.2f, true)
-        binding.recItems.adapter = itemsAdapter
+                        ToolBar(
+                            title = stringResource(id = R.string.text_search),
+                            navigationAction = IconAction(R.drawable.ic_back, this@FragmentSearch::onBackPressed),
+                        )
 
-        itemsAdapter.registerAdapterDataObserver(SimpleAdapterDataObserver{
-            isEmptyItems = itemsAdapter.itemCount == 0
-        })
-        isEmptyItems = itemsAdapter.itemCount == 0
-    }
+                        TextField(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(10.dp),
+                            value = searchState.value,
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(
+                                imeAction = ImeAction.Done,
+                                capitalization = KeyboardCapitalization.Sentences
+                            ),
+                            keyboardActions = KeyboardActions {
+                                hideKeyboard()
+                            },
+                            textStyle = TextStyle(
+                                color = Color.Black,
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            shape = RoundedCornerShape(10.dp),
+                            colors = TextFieldDefaults.textFieldColors(
+                                cursorColor = Color.Black,
+                                backgroundColor = Color.White,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                            ),
+                            onValueChange = viewModel::setSearch
+                        )
 
-    private fun observeViewModel(){
+                        LineTextSpacer(
+                            text = getString(R.string.text_items_title),
+                            modifier = Modifier
+                                .requiredHeight(25.dp)
+                                .fillMaxWidth()
+                        )
 
-        viewModel.items.observe(viewLifecycleOwner){
-            itemsAdapter.submitList(it)
-        }
+                        Spacer(modifier = Modifier.height(10.dp))
 
-        viewModel.bagCount.observe(viewLifecycleOwner){
-            bagCount = it
+                        ItemsColumn(
+                            listItems = itemsState.value.orEmpty(),
+                            modifier = Modifier
+                                .padding(horizontal = 10.dp)
+                                .fillMaxSize(),
+                            onItemClicked = this@FragmentSearch::onItemClick
+                        )
+                    }
+
+                    ShopFloating(
+                        bagSize = bagCountState.value,
+                        modifier = Modifier
+                            .padding(end = 20.dp, bottom = 20.dp)
+                            .size(75.dp)
+                            .align(Alignment.BottomEnd),
+                    ) {
+                        val action = FragmentSearchDirections.toBag()
+                        findNavController().navigate(action)
+                    }
+                }
+            }
         }
 
     }
@@ -92,20 +128,6 @@ class FragmentSearch: BaseFragment(R.layout.fragment_search) {
         val action = FragmentSearchDirections.toDetail()
         action.itemId = item.id
         findNavController().navigate(action)
-    }
-
-    override fun onClick(v: View?) {
-        when (v?.id){
-            binding.btnBack.id -> {
-                onBackPressed()
-            }
-            binding.bag.root.id -> {
-                logger.logExecution("onBagClick")
-                val action = FragmentSearchDirections.toBag()
-                findNavController().navigate(action)
-            }
-            else -> super.onClick(v)
-        }
     }
 
 }
